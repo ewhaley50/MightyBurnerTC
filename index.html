@@ -19,11 +19,14 @@
 <body>
   <!-- Top Announcement (optional) -->
   <div class="announce" role="region" aria-label="Announcement">
-    <div class="container announce__inner">
-      <span class="announce__text">Summer season is open — limited spots.</span>
-      <a class="btn btn--small btn--ghost" href="#register">Register</a>
-    </div>
+  <div class="container announce__inner">
+    <span class="announce__text">
+      Summer season starts in <strong><span id="seasonCountdown">--d --h --m --s</span></strong>
+      <span class="muted small">(June 1, 2026)</span>
+    </span>
+    <a class="btn btn--small btn--ghost" href="#register">Register</a>
   </div>
+</div>
 
   <!-- Header / Nav -->
   <header class="header" id="top">
@@ -49,6 +52,7 @@
           <a class="nav__link" href="#programs">Programs</a>
           <a class="nav__link" href="#schedule">Schedule</a>
           <a class="nav__link" href="#coaches">Coaches</a>
+          <a class="nav__link" href="#qualifying">Junior Olympic/Nationals Qualifying</a>
           <a class="nav__link" href="#faq">FAQ</a>
           <a class="btn btn--small" href="#register">Register</a>
         </div>
@@ -61,10 +65,10 @@
     <section class="hero">
       <div class="container hero__grid">
         <div class="hero__copy">
-          <p class="pill">Summer Track • Speed • Hurdles • Confidence</p>
+          <p class="pill">Track Club • USATF • AAU </p>
           <h1>Build speed. Learn technique. Have fun doing it.</h1>
           <p class="lead">
-            Mighty Burner Track Club is a summer training program for youth athletes.
+            Mighty Burner Track Club is a track club in the Tampa Bay area focused on providing guidance, training and meets for youth, High School and Masters athletes.
             We focus on fundamentals, sprint mechanics, hurdles, and healthy competition.
           </p>
 
@@ -80,17 +84,17 @@
             </div>
             <div class="stat">
               <div class="stat__num">Ages</div>
-              <div class="stat__label">8–18 (customize)</div>
+              <div class="stat__label">8–99+</div>
             </div>
             <div class="stat">
-              <div class="stat__num">Speed+</div>
-              <div class="stat__label">Technique first</div>
+              <div class="stat__num">Focus</div>
+              <div class="stat__label">Sprints•Hurdles•Jumps </div>
             </div>
           </div>
         </div>
 
         <div class="hero__art" aria-hidden="true">
-          <img src="/assets/img/hero-track.svg" alt="" />
+          <img src="/assets/img/MB-logo.png" alt="" />
         </div>
       </div>
     </section>
@@ -100,7 +104,6 @@
       <div class="container">
         <div class="section__head">
           <h2>About Mighty Burner</h2>
-          <p>We coach athletes with a clear plan: fundamentals → speed → confidence.</p>
         </div>
 
         <div class="cards">
@@ -114,15 +117,7 @@
           <article class="card">
             <h3>Events we cover</h3>
             <p>
-              Sprints (60–400), hurdles, relays, and general athletic development.
-              (Customize this list for your team.)
-            </p>
-          </article>
-          <article class="card">
-            <h3>Team culture</h3>
-            <p>
-              Positive energy, accountability, and a supportive environment for beginners
-              and advanced athletes alike.
+              Sprints (60–400), hurdles, relays, jumps and general athletic development.
             </p>
           </article>
         </div>
@@ -133,8 +128,7 @@
     <section class="section section--alt" id="programs">
       <div class="container">
         <div class="section__head">
-          <h2>Programs</h2>
-          <p>Pick what fits your athlete (or we’ll place them).</p>
+          <h2>Program Focus</h2>
         </div>
 
         <div class="cards cards--2">
@@ -154,27 +148,11 @@
               <li>Lead/trail leg drills + rhythm</li>
               <li>Step pattern development</li>
               <li>Speed with control</li>
-              <li>Race modeling (age appropriate)</li>
+              <li>Race modeling </li>
             </ul>
           </article>
 
-          <article class="card">
-            <h3>Season Prep (Optional)</h3>
-            <ul class="list">
-              <li>Build a base without burning out</li>
-              <li>Tempo days + sprint days</li>
-              <li>Injury prevention + recovery habits</li>
-            </ul>
-          </article>
-
-          <article class="card">
-            <h3>Private / Small Group</h3>
-            <ul class="list">
-              <li>1:1 or small group sessions</li>
-              <li>Technique breakdowns</li>
-              <li>Customized weekly plan</li>
-            </ul>
-          </article>
+          
         </div>
       </div>
     </section>
@@ -183,8 +161,8 @@
     <section class="section" id="schedule">
       <div class="container">
         <div class="section__head">
-          <h2>Schedule</h2>
-          <p>Example schedule — edit this to match your actual days/times.</p>
+          <h2>Practice Schedule</h2>
+          <p>Day/Times may vary.</p>
         </div>
 
         <div class="tableWrap" role="region" aria-label="Training schedule" tabindex="0">
@@ -200,51 +178,218 @@
             <tbody>
               <tr>
                 <td>Mon</td>
-                <td>6:00–7:30 PM</td>
-                <td>Acceleration + technique</td>
-                <td>Track (TBD)</td>
+                <td>5:00–6:30 PM</td>
+                <td>Hurdles + Plyos</td>
+                <td>NS</td>
               </tr>
               <tr>
                 <td>Wed</td>
-                <td>6:00–7:30 PM</td>
-                <td>Speed endurance / rhythm</td>
-                <td>Track (TBD)</td>
+                <td>6:00–6:30 PM</td>
+                <td>Speed endurance / Strength</td>
+                <td>NS</td>
               </tr>
+             
               <tr>
-                <td>Fri</td>
-                <td>6:00–7:15 PM</td>
-                <td>Hurdles + starts</td>
-                <td>Track (TBD)</td>
-              </tr>
-              <tr>
-                <td>Sat (Optional)</td>
-                <td>9:00–10:15 AM</td>
-                <td>Relays / competition prep</td>
-                <td>Track (TBD)</td>
+                <td>Sat </td>
+                <td>9:00–10:30 AM</td>
+                <td>Hurdles / Max V</td>
+                <td>NS</td>
               </tr>
             </tbody>
           </table>
         </div>
 
         <div class="note">
-          <strong>Note:</strong> We adjust groups by age and experience. Expect warm-up, drills, main set, and cool-down.
+          <strong>Note:</strong> Times, days and work out may have to be adjusted depending on weather and external factors
+        </div>
+
+        <!-- MEET SCHEDULE -->
+    <div class="section__head" style="margin-top:40px;">
+      <h2>Meet Schedule (Tentative)</h2>
+      <p>Dates subject to change.</p>
+    </div>
+
+    <div class="tableWrap" role="region" aria-label="Meet schedule" tabindex="0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Meet Name</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>BayChamps (Treyvon 100m Showcase)</td>
+            <td>Aquilla J Morgan High School, Tampa</td>
+            <td>3/7</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>Florida International (Noah Lyles 100m Showcase)</td>
+            <td>IMG, Bradenton</td>
+            <td>3/21</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>OTD Timing Summer Series #1</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>5/16</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>BAYTAF Classic</td>
+            <td>Jefferson High School, Tampa, FL</td>
+            <td>5/22–5/24</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>OTD Timing Summer Series #2</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>5/30</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>OTD Timing Summer Series #3</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>6/20</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>OTD Timing Summer Series #4</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>7/11</td>
+            <td></td>
+          </tr>
+
+          <tr>
+            <td>OTD Timing Summer Series #5</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>7/25</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td>OTD Timing Summer Series #6</td>
+            <td>Tenoroc High School, Lakeland</td>
+            <td>8/01</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note">
+          <strong>Note:</strong> All meets are subject to change. 
         </div>
       </div>
     </section>
+
+    <!-- Qualifying Paths -->
+<section class="section" id="qualifying">
+  <div class="container">
+    <div class="section__head">
+      <h2>Junior Olympic Qualifying Paths</h2>
+      <p>There are two main routes for Tampa Bay athletes: <strong>USATF</strong> and <strong>AAU</strong>. Dates/locations can change each year.</p>
+    </div>
+
+    <!-- USATF -->
+    <h3 style="margin: 12px 0 10px;"> USATF Path – Tampa Bay Athletes</h3>
+    <div class="tableWrap" role="region" aria-label="USATF qualifying path" tabindex="0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Meet Name</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>USATF Florida Association Junior Olympics</td>
+            <td>TBD (Usually Lakeland / Winter Garden / Jacksonville)</td>
+            <td>TBD – Mid-June</td>
+            <td>State meet – top 8 advance to Region 4</td>
+          </tr>
+          <tr>
+            <td>USATF Region 4 Junior Olympics</td>
+            <td>TBD (Usually GA or SC)</td>
+            <td>TBD – Late June / Early July</td>
+            <td>FL + GA + SC region</td>
+          </tr>
+          <tr>
+            <td>USATF National Junior Olympics</td>
+            <td>TBD (Rotates Nationwide)</td>
+            <td>TBD – Late July</td>
+            <td>National meet</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- AAU -->
+    <h3 style="margin: 28px 0 10px;"> AAU Path – Tampa Bay Athletes</h3>
+    <div class="tableWrap" role="region" aria-label="AAU qualifying path" tabindex="0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Meet Name</th>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>AAU Florida District Qualifier – Tampa Area</td>
+            <td>Florida (Tampa area) — District #14</td>
+            <td>TBD (May/June 2026)</td>
+            <td>Top 16 advance to Regionals</td>
+        </tr>
+        <tr>
+            <td>AAU Regional Qualifier</td>
+            <td>Orlando, FL</td>
+            <td>June 25–28, 2026</td>
+            <td>Top 6 qualify to AAU Junior Olympics</td>
+        </tr>
+        <tr>
+            <td>NexGen AAU Primary Track &amp; Field Invitational National Qualifier</td>
+            <td>Miramar, FL</td>
+            <td>May 30–31, 2026</td>
+            <td>Top 6 (combined results) qualify to AAU Junior Olympics (NexGen route)</td>
+        </tr>
+        <tr>
+            <td>AAU Primary Nationals &amp; Club Championships</td>
+            <td>Jacksonville, FL</td>
+            <td>July 4–11, 2026</td>
+            <td>Top 6 (combined results) from select national qualifiers advance to AAU Junior Olympics</td>
+        </tr>
+        <tr>
+            <td>AAU Junior Olympic Games</td>
+            <td>Drake Stadium, Des Moines</td>
+            <td>Aug 1–8, 2026</td>
+            <td>National meet</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
 
     <!-- Coaches -->
     <section class="section section--alt" id="coaches">
       <div class="container">
         <div class="section__head">
           <h2>Coaches</h2>
-          <p>Add your real coach bios here (names, credentials, PRs, coaching highlights).</p>
         </div>
 
         <div class="cards cards--3">
           <article class="card person">
             <div class="avatar" aria-hidden="true">MB</div>
-            <h3>Coach Name</h3>
-            <p class="muted">Head Coach • Sprints/Hurdles</p>
+            <h3>Elliot W</h3>
+            <p class="muted">Sprints/Hurdles</p>
             <p>
               Short bio. What you coach, your approach, and a quick highlight.
             </p>
@@ -252,8 +397,8 @@
 
           <article class="card person">
             <div class="avatar" aria-hidden="true">MB</div>
-            <h3>Coach Name</h3>
-            <p class="muted">Assistant Coach • Speed</p>
+            <h3>Jeff M</h3>
+            <p class="muted">Sprints/Jumps</p>
             <p>
               Short bio. Keep it simple and parent-friendly.
             </p>
@@ -261,8 +406,8 @@
 
           <article class="card person">
             <div class="avatar" aria-hidden="true">MB</div>
-            <h3>Coach Name</h3>
-            <p class="muted">Assistant Coach • Strength/Mobility</p>
+            <h3>Roosevelt A</h3>
+            <p class="muted">Sprints/Strength</p>
             <p>
               Short bio. Background and what they help athletes improve.
             </p>
@@ -276,35 +421,34 @@
       <div class="container">
         <div class="section__head">
           <h2>FAQ</h2>
-          <p>Common questions parents ask.</p>
         </div>
 
         <div class="faq">
           <details class="faq__item">
             <summary>What should athletes bring?</summary>
             <div class="faq__content">
-              Water, running shoes, spikes (optional), a towel, and a good attitude.
+              Water, running shoes, spikes, a towel, snack and a good attitude.
             </div>
           </details>
 
           <details class="faq__item">
-            <summary>Do you accept beginners?</summary>
+            <summary>Meet Information</summary>
             <div class="faq__content">
-              Yes. We group athletes by experience and teach fundamentals first.
+              Meets take place mostly in the Tampa Bay area , transportation, lodging and entry fees are athletes responsibility.
             </div>
           </details>
 
           <details class="faq__item">
             <summary>Where do you practice?</summary>
             <div class="faq__content">
-              Put your primary track location here (and a backup for weather).
+              North Side Christian and as a back up Walter Fuller Park 
             </div>
           </details>
 
           <details class="faq__item">
-            <summary>How do I register?</summary>
+            <summary>How much does it cost</summary>
             <div class="faq__content">
-              Use the form below. If you want payments online, we can add a Stripe link later.
+              Update this 
             </div>
           </details>
         </div>
@@ -352,6 +496,22 @@
             </label>
 
             <label class="field">
+                <span>Shirt Size</span>
+                <select name="shirt_size" required>
+                    <option value="" selected disabled>Select a size</option>
+                    <option value="YS">Youth Small (YS)</option>
+                    <option value="YM">Youth Medium (YM)</option>
+                    <option value="YL">Youth Large (YL)</option>
+                    <option value="YXL">Youth XL (YXL)</option>
+                    <option value="AS">Adult Small (AS)</option>
+                    <option value="AM">Adult Medium (AM)</option>
+                    <option value="AL">Adult Large (AL)</option>
+                    <option value="AXL">Adult XL (AXL)</option>
+                    <option value="A2XL">Adult 2XL (A2XL)</option>
+                </select>
+                </label>
+
+            <label class="field">
               <span>Primary Events</span>
               <input name="events" type="text" placeholder="e.g., 100m, 200m, 110H, 400H" />
             </label>
@@ -361,24 +521,107 @@
               <textarea name="notes" rows="4" placeholder="Beginner, intermediate, goals, injuries, etc."></textarea>
             </label>
           </div>
-
+           <input type="hidden" name="payment_status" value="Unpaid" />
           <div class="form__actions">
             <button class="btn" type="submit">Submit Registration</button>
-            <p class="muted small">
-              This form works on Netlify automatically (no backend needed).
-            </p>
           </div>
         </form>
 
+
+        <!-- Club Records -->
+<section class="section" id="records">
+  <div class="container">
+    <div class="section__head">
+      <h2>Club Records</h2>
+      <p>Top 10 all-time marks (update as the season goes).</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Club Records Tabs">
+      <button class="tab is-active" role="tab" aria-selected="true" aria-controls="recordsWomen" id="tabWomen" data-tab="women">
+        Women
+      </button>
+      <button class="tab" role="tab" aria-selected="false" aria-controls="recordsMen" id="tabMen" data-tab="men">
+        Men
+      </button>
+    </div>
+
+    <!-- WOMEN -->
+    <div class="tabPanel is-active" role="tabpanel" id="recordsWomen" aria-labelledby="tabWomen">
+      <div class="tableWrap" role="region" aria-label="Women club records" tabindex="0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Event</th>
+              <th>Mark</th>
+              <th>Athlete</th>
+              <th>Meet</th>
+              <th>Date</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Replace these sample rows -->
+            <tr><td>1</td><td>100m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>200m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>400m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>100H / 110H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>400H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>Long Jump</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>4x100</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>4x400</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MEN -->
+    <div class="tabPanel" role="tabpanel" id="recordsMen" aria-labelledby="tabMen">
+      <div class="tableWrap" role="region" aria-label="Men club records" tabindex="0">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Event</th>
+              <th>Mark</th>
+              <th>Athlete</th>
+              <th>Meet</th>
+              <th>Date</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Replace these sample rows -->
+            <tr><td>1</td><td>100m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>2</td><td>100m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>3</td><td>100m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>200m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>2</td><td>200m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>3</td><td>200m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>400m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>2</td><td>400m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>3</td><td>400m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>110H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>400H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>Long Jump</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+
+            <tr><td>1</td><td>4x100</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>4x400</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
         <div class="contact">
           <h3>Contact</h3>
-          <p class="muted">
-            Add your team email/Instagram here.
-          </p>
+
           <div class="contact__row">
             <a class="link" href="mailto:info@mightyburnertc.com">info@mightyburnertc.com</a>
             <span class="dot" aria-hidden="true">•</span>
-            <a class="link" href="#" target="_blank" rel="noopener">Instagram (add link)</a>
+            <a class="link" href="https://www.instagram.com/mightyburnertc/" rel="noopener">Instagram</a>
           </div>
         </div>
       </div>

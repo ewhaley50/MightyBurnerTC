@@ -1,0 +1,5 @@
+✔ Athlete roster page
+✔ Meet calendar auto-download ICS (like we did before)
+✔ Payment link with Stripe
+✔ Photo gallery
+✔ Coach bios styled like RareBody
