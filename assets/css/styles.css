@@ -296,6 +296,27 @@ img{ max-width: 100%; display: block; }
 }
 .table td{ color: var(--text); font-weight: 550; }
 
+
+.person img.avatar--photo{
+  width: 140px;
+  height: 140px;
+  border-radius: 16px;      /* modern square look */
+  object-fit: cover;
+  margin-bottom: 14px;
+  border: 3px solid rgba(255,183,3,.5);
+}
+.person img.avatar--photo{
+  border-radius: 50%;
+}
+.person{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.person h3{
+  margin-top:6px;
+}
 /* People */
 .person .avatar{
   width: 42px; height: 42px;
