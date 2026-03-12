@@ -54,6 +54,7 @@
           <a class="nav__link" href="#coaches">Coaches</a>
           <a class="nav__link" href="#qualifying">Junior Olympic/Nationals Qualifying</a>
           <a class="nav__link" href="#faq">FAQ</a>
+          <a class="nav__link" href="#gallery">Gallery</a>
           <a class="btn btn--small" href="#register">Register</a>
         </div>
       </nav>
@@ -276,25 +277,6 @@
         </thead>
         <tbody>
           <tr>
-            <td>BayChamps (Treyvon 100m Showcase)</td>
-            <td>Aquilla J Morgan High School, Tampa</td>
-            <td>3/7</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>Florida International (Noah Lyles 100m Showcase)</td>
-            <td>IMG, Bradenton</td>
-            <td>3/21</td>
-            <td></td>
-          </tr>
-          <tr>
-            <td>AAU Florida District Qualifier – Tampa Area</td>
-            <td>Tampa, Fl</td>
-            <td>TBD- May</td>
-            <td>Top 16 advance to Regionals</td>
-          </tr>
-          
-          <tr>
             <td>OTD Timing Summer Series #1</td>
             <td>Tenoroc High School, Lakeland</td>
             <td>5/16</td>
@@ -338,8 +320,16 @@
             <td>5/30</td>
             <td></td>
           </tr>
+
           <tr>
-            <td>USATF Florida Association Qualifer</td>
+            <td>AAU Florida District Qualifier</td>
+            <td>Lakeland, Fl</td>
+            <td>6/6</td>
+            <td>Top 16 advance to Regionals</td>
+          </tr>
+
+          <tr>
+            <td>USATF Florida Association Qualifier</td>
             <td>Tampa, Fl</td>
             <td>TBD - June</td>
             <td>Top 8 advance to Region 4</td>
@@ -431,6 +421,12 @@
     </div>
 
     <div class="note">
+      <p class="muted small" style="margin-top:14px;">
+        Add the meet schedule to your calendar:
+        <a href="/assets/documents/MB_Schedule.ics" class="link" download>
+          Download ICS file
+        </a>
+      </p>
           <strong>Note:</strong> All meets are subject to change. 
         </div>
       </div>
@@ -624,6 +620,100 @@
       </div>
     </section>
 
+
+    <!-- Gallery -->
+<section class="section section--alt" id="gallery">
+  <div class="container">
+    <div class="section__head">
+      <h2>Gallery</h2>
+      <p>Team photos, meet highlights, and training videos.</p>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Gallery Tabs">
+      <button class="tab is-active" type="button" data-gallery-tab="photos">Photos</button>
+      <button class="tab" type="button" data-gallery-tab="videos">Videos</button>
+    </div>
+
+    <!-- Photos Panel -->
+    <div class="galleryPanel is-active" id="galleryPhotos">
+      <div class="gallerySliderWrap">
+        <button class="galleryArrow galleryArrow--left" type="button" data-scroll-target="photoTrack" data-direction="-1" aria-label="Scroll photos left">
+          ‹
+        </button>
+
+        <div class="galleryTrack" id="photoTrack">
+          <article class="mediaCard">
+            <img src="/assets/Gallery/images/Gallery1.JPG" alt="Mighty Burner athletes during practice" class="galleryImage" />
+            <div class="mediaBody">
+           <!--  <h3>Team Practice</h3>
+              <p class="muted">Sprint work and hurdle drills.</p> --> 
+            </div>
+          </article>
+
+          <article class="mediaCard">
+            <img src="/assets/Gallery/images/Gallery2.JPG" alt="Mighty Burner athletes during practice" class="galleryImage" />
+            <div class="mediaBody">
+            </div>
+          </article>
+
+          <article class="mediaCard">
+            <img src="/assets/Gallery/images/Gallery3.JPG" alt="Mighty Burner athletes during practice" class="galleryImage" />
+            <div class="mediaBody">
+            </div>
+          </article>
+
+          <article class="mediaCard">
+            <img src="/assets/Gallery/images/Gallery4.JPG" alt="Mighty Burner athletes during practice" class="galleryImage" />
+            <div class="mediaBody">
+            </div>
+          </article>
+
+          <article class="mediaCard">
+            <img src="/assets/Gallery/images/Gallery5.jpeg" alt="Mighty Burner athletes during practice" class="galleryImage" />
+            <div class="mediaBody">
+            </div>
+          </article>
+        </div>
+
+        <button class="galleryArrow galleryArrow--right" type="button" data-scroll-target="photoTrack" data-direction="1" aria-label="Scroll photos right">
+          ›
+        </button>
+      </div>
+    </div>
+
+    <!-- Videos Panel -->
+    <div class="galleryPanel" id="galleryVideos">
+      <div class="gallerySliderWrap">
+        <button class="galleryArrow galleryArrow--left" type="button" data-scroll-target="videoTrack" data-direction="-1" aria-label="Scroll videos left">
+          ‹
+        </button>
+
+        <div class="galleryTrack" id="videoTrack">
+          <article class="mediaCard">
+            <video class="galleryVideo" controls preload="metadata">
+              <source src="/assets/Gallery/videos/Video1.mp4" type="video/mp4" />
+            </video>
+            <div class="mediaBody">
+            </div>
+          </article>
+
+          <article class="mediaCard">
+            <video class="galleryVideo" controls preload="metadata">
+              <source src="/assets/Gallery/videos/Video2.mp4" type="video/mp4" />
+            </video>
+            <div class="mediaBody">
+            </div>
+          </article>
+        </div>
+
+        <button class="galleryArrow galleryArrow--right" type="button" data-scroll-target="videoTrack" data-direction="1" aria-label="Scroll videos right">
+          ›
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
     <!-- FAQ -->
     <section class="section" id="faq">
       <div class="container">
@@ -778,7 +868,7 @@
             <tr><td>1</td><td>100m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
             <tr><td>1</td><td>200m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
             <tr><td>1</td><td>400m</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
-            <tr><td>1</td><td>100H / 110H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
+            <tr><td>1</td><td>100H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
             <tr><td>1</td><td>400H</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
             <tr><td>1</td><td>Long Jump</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>
             <tr><td>1</td><td>4x100</td><td>XX.XX</td><td>Athlete Name</td><td>Meet Name</td><td>Date</td><td></td></tr>

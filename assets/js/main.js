@@ -65,6 +65,55 @@ function startSeasonCountdown() {
 
 startSeasonCountdown();
 
+function initGalleryTabs() {
+  const tabs = document.querySelectorAll("[data-gallery-tab]");
+  const photosPanel = document.getElementById("galleryPhotos");
+  const videosPanel = document.getElementById("galleryVideos");
+
+  if (!tabs.length || !photosPanel || !videosPanel) return;
+
+  function setActive(which) {
+    tabs.forEach(tab => {
+      const isActive = tab.dataset.galleryTab === which;
+      tab.classList.toggle("is-active", isActive);
+      tab.setAttribute("aria-selected", String(isActive));
+    });
+
+    photosPanel.classList.toggle("is-active", which === "photos");
+    videosPanel.classList.toggle("is-active", which === "videos");
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      setActive(tab.dataset.galleryTab);
+    });
+  });
+
+  setActive("photos");
+}
+
+function initGalleryScroll() {
+  const buttons = document.querySelectorAll("[data-scroll-target]");
+
+  buttons.forEach(button => {
+    button.addEventListener("click", () => {
+      const targetId = button.dataset.scrollTarget;
+      const direction = Number(button.dataset.direction || 1);
+      const track = document.getElementById(targetId);
+
+      if (!track) return;
+
+      const scrollAmount = track.clientWidth * 0.8;
+      track.scrollBy({
+        left: scrollAmount * direction,
+        behavior: "smooth"
+      });
+    });
+  });
+}
+
+initGalleryTabs();
+initGalleryScroll();
 
 
 function initRecordsTabs() {
