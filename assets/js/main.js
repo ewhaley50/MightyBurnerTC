@@ -40,7 +40,7 @@ function startSeasonCountdown() {
   // Countdown to June 1st (local time)
   const now = new Date();
   const targetYear = now.getMonth() > 5 ? now.getFullYear() + 1 : now.getFullYear(); // if past June, use next year
-  const target = new Date(targetYear, 5, 1, 0, 0, 0); // Month is 0-based: 5 = June
+  const target = new Date(targetYear, 4, 18, 0, 0, 0); // Month is 0-based: 5 = June
 
   function tick() {
     const diff = target.getTime() - Date.now();
