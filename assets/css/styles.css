@@ -633,6 +633,79 @@ img{
   padding: 4px 0 10px;
 }
 
+/* Athletic.net-style Club Records */
+.recordsList{
+  display:grid;
+  gap: 18px;
+}
+
+.recordEvent{
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(16,23,35,.72);
+  overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+}
+
+.recordEvent h3{
+  margin: 0;
+  padding: 14px 16px;
+  color: var(--accent2);
+  font-size: 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+}
+
+.recordRows{
+  display:grid;
+}
+
+.recordRow{
+  display:grid;
+  grid-template-columns: 42px 1.2fr 100px 80px 2fr;
+  gap: 12px;
+  align-items:center;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+
+.recordRow:last-child{
+  border-bottom: none;
+}
+
+.recordPlace{
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.recordAthlete{
+  color: var(--text);
+  font-weight: 800;
+}
+
+.recordMark{
+  color: var(--text);
+  font-weight: 900;
+}
+
+.recordMeta,
+.recordMeet{
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (max-width: 800px){
+  .recordRow{
+    grid-template-columns: 34px 1fr auto;
+    gap: 8px;
+  }
+
+  .recordMeta,
+  .recordMeet{
+    grid-column: 2 / -1;
+  }
+}
+
 /* Form */
 .form{
   border: 1px solid var(--border);
