@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mighty Burner Records</title>
+  <style>
+    :root{--bg:#0f172a;--card:#111827;--muted:#94a3b8;--text:#e5e7eb;--accent:#f97316;--line:#334155;--good:#22c55e;--bad:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:var(--text)}
+    header{padding:24px 18px;border-bottom:1px solid var(--line);background:rgba(15,23,42,.88);position:sticky;top:0;z-index:5;backdrop-filter:blur(8px)}
+    h1{margin:0;font-size:28px}.sub{color:var(--muted);margin-top:6px}
+    main{max-width:1320px;margin:0 auto;padding:18px}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{background:rgba(17,24,39,.92);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    label{display:block;font-size:13px;color:var(--muted);margin:12px 0 5px}
+    input,select,textarea,button{width:100%;border-radius:10px;border:1px solid var(--line);background:#020617;color:var(--text);padding:10px;font-size:14px}
+    button{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#111827;font-weight:800;margin-top:12px}
+    button.secondary{background:#020617;color:var(--text);border-color:var(--line)}
+    button.danger{background:var(--bad);border-color:var(--bad);color:white}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .toolbar input,.toolbar select{width:auto;min-width:180px}.toolbar button{width:auto;margin-top:0}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+    th{position:sticky;top:93px;background:#0b1220;z-index:4;color:#f8fafc}
+    tr:nth-child(even) td{background:rgba(2,6,23,.25)} tr:hover td{background:rgba(249,115,22,.08)}
+    .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted);font-size:12px}
+    .rank{font-weight:800;color:#fbbf24}.small{font-size:12px;color:var(--muted)} .ok{color:var(--good)} .err{color:var(--bad)}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.tab{width:auto;margin:0;background:#020617;color:var(--text)}.tab.active{background:var(--accent);color:#111827}
+    .hidden{display:none}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+    @media(max-width:900px){.summary{grid-template-columns:1fr 1fr}th{top:0}}
+    .stat{background:#020617;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:22px}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Mighty Burner Performance Records</h1>
+  <div class="sub">Server-saved records using Netlify Functions + Supabase</div>
+</header>
+
+<main>
+  <div class="grid">
+    <section class="card">
+      <h2>Add Performance</h2>
+      <form id="recordForm">
+        <label>Athlete</label>
+        <input id="athlete" value="Sean Williams" required />
+        <div class="row">
+          <div>
+            <label>Event / Distance</label>
+            <select id="event"></select>
+          </div>
+          <div>
+            <label>Mark</label>
+            <input id="mark" placeholder="10.75 or 1:08 or 840" required />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Month</label>
+            <select id="month">
+              <option></option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option>
+            </select>
+          </div>
+          <div>
+            <label>Year</label>
+            <input id="year" type="number" value="2026" min="1990" max="2100" />
+          </div>
+        </div>
+        <label>Source / Workout</label>
+        <input id="source" placeholder="300/200/100, meet, hills, etc." />
+        <label>Notes</label>
+        <textarea id="notes" rows="3" placeholder="weather, spikes, rest, splits, etc."></textarea>
+        <button type="submit">Save Performance</button>
+        <button type="button" class="secondary" id="resetBtn">Clear Form</button>
+      </form>
+      <p class="small">Top 25 is calculated automatically. Slower marks are still saved in full history.</p>
+      <div id="status" class="small"></div>
+    </section>
+
+    <section>
+      <div class="summary">
+        <div class="stat"><span class="small">Total Marks</span><br><b id="totalMarks">0</b></div>
+        <div class="stat"><span class="small">Events</span><br><b id="totalEvents">0</b></div>
+        <div class="stat"><span class="small">Current Event PB</span><br><b id="eventPb">—</b></div>
+        <div class="stat"><span class="small">Top 25 Cutoff</span><br><b id="cutoff">—</b></div>
+      </div>
+
+      <div class="card">
+        <div class="tabs">
+          <button class="tab active" data-view="top25">Top 25</button>
+          <button class="tab" data-view="history">Full History</button>
+          <button class="tab" data-view="notTop25">Not Top 25</button>
+          <button class="tab" data-view="yearBests">Year Bests</button>
+        </div>
+
+        <div class="toolbar">
+          <select id="filterEvent"></select>
+          <input id="search" placeholder="Search notes/source/month/year" />
+          <button class="secondary" id="refreshBtn">Refresh</button>
+          <button class="secondary" id="exportCsvBtn">Export CSV</button>
+        </div>
+
+        <div style="overflow:auto;max-height:72vh">
+          <table>
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script>
+const EVENTS = [
+"10m Fly","20m Fly","30m Fly","40m Fly","50m Fly","60m Fly","80m Fly","100m","120m","145m Blue Mark","150m","200m","250m","300m","350m","400m","500m","600m",
+"5 Hurdles","200mH","6 Hurdles","7 Hurdles","8 Hurdles (300)","400IH H1","400IH H2","400IH H3","400IH H4","400IH H6-10","170m Hills","200m Hills","230m Hills","300m Hills",
+"3 Min Runs","2 Min Runs","Largo Loop 640m","10m Blocks","20m Blocks","30m Blocks","40m Blocks","50m Blocks","60m Blocks","80m Blocks","100m Blocks","120m Non Flying","145m Non Flying","150m Non Flying","200m Non Flying",
+"Box Jump","Seminole Run","20 Min Fartlek","45 Sec Runs","40 Sec Runs"
+];
+
+let records = [];
+let view = "top25";
+
+function $(id){return document.getElementById(id)}
+function optionize(sel, includeAll=false){
+  sel.innerHTML = includeAll ? '<option value="">All Events</option>' : '';
+  EVENTS.forEach(e=>{const o=document.createElement("option");o.value=e;o.textContent=e;sel.appendChild(o)});
+}
+optionize($("event")); optionize($("filterEvent"), true);
+$("filterEvent").value = "100m";
+
+function parseMark(mark){
+  if(mark == null) return null;
+  const s = String(mark).trim();
+  if(!s) return null;
+  if(s.includes(":")){
+    const parts = s.split(":").map(Number);
+    if(parts.length===2) return parts[0]*60 + parts[1];
+    if(parts.length===3) return parts[0]*3600 + parts[1]*60 + parts[2];
+  }
+  const n = Number(s.replace(/[^\d.]/g,""));
+  return Number.isFinite(n) ? n : null;
+}
+function isDistanceEvent(ev){ return !["3 Min Runs","2 Min Runs","45 Sec Runs","40 Sec Runs","Box Jump"].includes(ev); }
+function compareRecords(a,b){
+  const av=parseMark(a.mark), bv=parseMark(b.mark);
+  if(["3 Min Runs","2 Min Runs","45 Sec Runs","40 Sec Runs","Box Jump"].includes(a.event_name)) return (bv??-Infinity)-(av??-Infinity);
+  return (av??Infinity)-(bv??Infinity);
+}
+function rankedForEvent(ev){
+  return records.filter(r=>!ev||r.event_name===ev).sort(compareRecords).map((r,i)=>({...r,rank:i+1}));
+}
+function top25ForEvent(ev){return rankedForEvent(ev).slice(0,25)}
+function csvEscape(v){return `"${String(v??"").replaceAll('"','""')}"`}
+
+async function api(path, opts={}){
+  const res = await fetch("/.netlify/functions/" + path, {
+    headers: {"Content-Type":"application/json"},
+    ...opts
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if(!res.ok) throw new Error((data && data.error) || res.statusText);
+  return data;
+}
+async function loadRecords(){
+  setStatus("Loading records...");
+  try{
+    const data = await api("get-records");
+    records = data.records || [];
+    setStatus("Loaded " + records.length + " records.", true);
+    render();
+  }catch(e){
+    setStatus("Could not load records: " + e.message, false);
+  }
+}
+function setStatus(msg, ok=true){ $("status").innerHTML = `<span class="${ok?'ok':'err'}">${msg}</span>`; }
+
+$("recordForm").addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const payload = {
+    athlete: $("athlete").value.trim(),
+    event_name: $("event").value,
+    mark: $("mark").value.trim(),
+    mark_value: parseMark($("mark").value),
+    month: $("month").value,
+    year: Number($("year").value || new Date().getFullYear()),
+    source: $("source").value.trim(),
+    notes: $("notes").value.trim()
+  };
+  try{
+    const data = await api("add-record", {method:"POST", body:JSON.stringify(payload)});
+    records.unshift(data.record);
+    setStatus("Saved performance.", true);
+    $("mark").value=""; $("source").value=""; $("notes").value="";
+    render();
+  }catch(err){ setStatus("Save failed: " + err.message, false); }
+});
+$("resetBtn").onclick = () => { $("recordForm").reset(); $("athlete").value="Sean Williams"; $("year").value="2026"; };
+
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active"); view=btn.dataset.view; render();
+});
+$("filterEvent").onchange=render; $("search").oninput=render; $("refreshBtn").onclick=loadRecords;
+
+$("exportCsvBtn").onclick=()=>{
+  const rows = filteredRows();
+  const header = ["rank","athlete","event","mark","month","year","source","notes","created_at"];
+  const csv = [header.join(",")].concat(rows.map(r=>header.map(h=>csvEscape(h==="event"?r.event_name:r[h])).join(","))).join("\n");
+  const blob = new Blob([csv],{type:"text/csv"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="mighty-burner-records.csv"; a.click();
+};
+
+async function deleteRecord(id){
+  if(!confirm("Delete this performance?")) return;
+  try{
+    await api("delete-record", {method:"POST", body:JSON.stringify({id})});
+    records = records.filter(r=>r.id!==id);
+    render();
+  }catch(e){ alert("Delete failed: "+e.message); }
+}
+window.deleteRecord = deleteRecord;
+
+function filteredRows(){
+  const ev=$("filterEvent").value, q=$("search").value.toLowerCase().trim();
+  let rows = [];
+  if(view==="top25"){
+    rows = ev ? top25ForEvent(ev) : EVENTS.flatMap(event=>top25ForEvent(event).map(r=>({...r,event_name:event})));
+  } else if(view==="notTop25"){
+    if(ev){
+      const ids = new Set(top25ForEvent(ev).map(r=>r.id));
+      rows = rankedForEvent(ev).filter(r=>!ids.has(r.id));
+    } else {
+      rows = EVENTS.flatMap(event=>{
+        const ids = new Set(top25ForEvent(event).map(r=>r.id));
+        return rankedForEvent(event).filter(r=>!ids.has(r.id));
+      });
+    }
+  } else if(view==="yearBests"){
+    const source = ev ? records.filter(r=>r.event_name===ev) : records;
+    const map = new Map();
+    source.forEach(r=>{
+      const key = r.event_name + "|" + r.year;
+      if(!map.has(key) || compareRecords(r,map.get(key))<0) map.set(key,r);
+    });
+    rows = Array.from(map.values()).sort((a,b)=>String(a.event_name).localeCompare(b.event_name)||Number(b.year)-Number(a.year));
+  } else {
+    rows = ev ? rankedForEvent(ev) : records.slice().sort((a,b)=>String(a.event_name).localeCompare(b.event_name)||compareRecords(a,b));
+  }
+  if(q) rows = rows.filter(r=>[r.athlete,r.event_name,r.mark,r.month,r.year,r.source,r.notes].join(" ").toLowerCase().includes(q));
+  return rows;
+}
+
+function render(){
+  const ev=$("filterEvent").value;
+  const rows = filteredRows();
+  $("totalMarks").textContent = records.length;
+  $("totalEvents").textContent = new Set(records.map(r=>r.event_name)).size;
+  const eventRows = ev ? rankedForEvent(ev) : [];
+  $("eventPb").textContent = ev && eventRows[0] ? eventRows[0].mark : "—";
+  $("cutoff").textContent = ev && eventRows[24] ? eventRows[24].mark : (ev ? "Under 25 marks" : "—");
+
+  $("tableHead").innerHTML = `<tr><th>Rank</th><th>Athlete</th><th>Event</th><th>Mark</th><th>Date</th><th>Source</th><th>Notes</th><th></th></tr>`;
+  $("tableBody").innerHTML = rows.map((r,idx)=>`
+    <tr>
+      <td><span class="rank">${r.rank || (view==="history" ? "" : idx+1)}</span></td>
+      <td>${r.athlete||""}</td>
+      <td><span class="pill">${r.event_name||""}</span></td>
+      <td><b>${r.mark||""}</b></td>
+      <td>${[r.month,r.year].filter(Boolean).join(" ")}</td>
+      <td>${r.source||""}</td>
+      <td>${r.notes||""}</td>
+      <td><button class="danger" style="width:auto;margin:0;padding:6px 8px" onclick="deleteRecord('${r.id}')">Delete</button></td>
+    </tr>`).join("");
+}
+
+loadRecords();
+</script>
+</body>
+</html>

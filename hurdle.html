@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hurdle Tape Mark Calculator</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; color: #222; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 20px; }
+  h1 { margin-bottom: 6px; }
+  .card { background: white; border-radius: 12px; padding: 18px; margin: 14px 0; box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+  label { display: block; font-weight: bold; margin-top: 12px; }
+  select, input { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+  button { margin-top: 16px; padding: 12px 18px; border: 0; border-radius: 8px; font-size: 16px; cursor: pointer; background: #222; color: white; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; background: white; }
+  th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+  th { background: #eee; }
+  .note { color: #555; font-size: 14px; }
+  .summary { font-size: 18px; line-height: 1.45; }
+  @media print { button, .inputs { display: none; } body { background: white; } .card { box-shadow: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Hurdle Tape Mark Calculator</h1>
+  <div class="note">Measures from the toe of the front foot in the blocks to each tape mark.</div>
+
+  <div class="card inputs">
+    <label>Athlete Name</label>
+    <input id="athlete" placeholder="Optional" />
+
+    <label>Gender/Event</label>
+    <select id="event">
+      <option value="women">Women 100H</option>
+      <option value="men">Men 110H</option>
+    </select>
+
+    <label>Height</label>
+    <select id="height"></select>
+
+    <label>Number of Steps to Hurdle 1</label>
+    <select id="steps">
+      <option value="8">8 steps</option>
+      <option value="7">7 steps</option>
+    </select>
+
+    <label>Takeoff Distance</label>
+    <select id="takeoffMode">
+      <option value="autoMid">Auto: middle of range</option>
+      <option value="autoShort">Auto: shorter/aggressive</option>
+      <option value="autoLong">Auto: longer/conservative</option>
+      <option value="custom">Custom inches</option>
+    </select>
+
+    <label>Custom Takeoff Distance in Inches</label>
+    <input id="customTO" type="number" value="77" />
+
+    <button onclick="calculate()">Calculate Tape Marks</button>
+    <button onclick="window.print()">Print</button>
+  </div>
+
+  <div class="card">
+    <div id="summary" class="summary"></div>
+    <table id="resultTable">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>Step Length</th>
+          <th>Tape Mark From Blocks</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const womenTO = {
+  "5'3\"": [77,81], "5'4\"": [76.5,80.5], "5'5\"": [76,80], "5'6\"": [75.5,79.5],
+  "5'7\"": [75,79], "5'8\"": [74.5,78.5], "5'9\"": [74,78], "5'10\"": [73,77.5],
+  "5'11\"": [72,77], "6'0\"": [70,75]
+};
+const menTO = {
+  "5'3\"": [89,93], "5'4\"": [88.5,92.5], "5'5\"": [88,92], "5'6\"": [87.5,91.5],
+  "5'7\"": [87,91], "5'8\"": [86.5,90.5], "5'9\"": [86,90], "5'10\"": [85.5,89.5],
+  "5'11\"": [85,89], "6'0\"": [84.5,88.5], "6'1\"": [84,88], "6'2\"": [83,87.5],
+  "6'3\"": [82,87], "6'4\"": [82,86.5], "6'5\"": [82,86]
+};
+
+const heightSel = document.getElementById('height');
+function populateHeights() {
+  const data = document.getElementById('event').value === 'women' ? womenTO : menTO;
+  heightSel.innerHTML = '';
+  Object.keys(data).forEach(h => {
+    const opt = document.createElement('option');
+    opt.value = h; opt.textContent = h;
+    heightSel.appendChild(opt);
+  });
+  if (data["5'7\""]) heightSel.value = "5'7\"";
+}
+document.getElementById('event').addEventListener('change', populateHeights);
+populateHeights();
+
+function inchesToFeet(inches) {
+  const ft = Math.floor(inches / 12);
+  const inch = inches - ft * 12;
+  return `${ft}'${inch.toFixed(1)}\"`;
+}
+
+function stepIncrements(event, steps) {
+  // Increments from prior step. First step has no increment.
+  let inc = event === 'women' ? [0,6,5,5,5,4,4,3] : [0,6,6,5,5,4,4,3];
+  return inc.slice(0, steps);
+}
+
+function calculate() {
+  const event = document.getElementById('event').value;
+  const steps = parseInt(document.getElementById('steps').value, 10);
+  const height = document.getElementById('height').value;
+  const athlete = document.getElementById('athlete').value.trim();
+  const data = event === 'women' ? womenTO : menTO;
+  const hurdleDistance = event === 'women' ? (13.0 * 39.3700787) : (13.72 * 39.3700787);
+  const mode = document.getElementById('takeoffMode').value;
+  let [minTO, maxTO] = data[height];
+  let takeoff;
+  if (mode === 'autoShort') takeoff = minTO;
+  else if (mode === 'autoLong') takeoff = maxTO;
+  else if (mode === 'custom') takeoff = parseFloat(document.getElementById('customTO').value || '0');
+  else takeoff = (minTO + maxTO) / 2;
+
+  const totalToTakeoff = hurdleDistance - takeoff;
+  const inc = stepIncrements(event, steps);
+  const incSumWeighted = inc.reduce((sum, x, i) => sum + x * (steps - i), 0);
+  const firstStep = (totalToTakeoff - incSumWeighted) / steps;
+
+  let stepLengths = [];
+  for (let i = 0; i < steps; i++) {
+    if (i === 0) stepLengths.push(firstStep);
+    else stepLengths.push(stepLengths[i-1] + inc[i]);
+  }
+  let cum = 0;
+  const tbody = document.querySelector('#resultTable tbody');
+  tbody.innerHTML = '';
+  stepLengths.forEach((len, idx) => {
+    cum += len;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${idx + 1}</td><td>${inchesToFeet(len)}</td><td>${inchesToFeet(cum)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const nameLine = athlete ? `<strong>${athlete}</strong><br>` : '';
+  document.getElementById('summary').innerHTML = `
+    ${nameLine}${event === 'women' ? 'Women 100H' : 'Men 110H'} — Height: <strong>${height}</strong>, Steps: <strong>${steps}</strong><br>
+    Takeoff distance: <strong>${inchesToFeet(takeoff)}</strong><br>
+    Total distance from blocks/front toe to takeoff: <strong>${inchesToFeet(totalToTakeoff)}</strong><br>
+    Model takeoff range for this height: <strong>${inchesToFeet(minTO)}–${inchesToFeet(maxTO)}</strong>
+  `;
+}
+calculate();
+</script>
+</body>
+</html>
