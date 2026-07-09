@@ -23,7 +23,11 @@
     .toolbar input,.toolbar select{width:auto;min-width:180px}.toolbar button{width:auto;margin-top:0}
     table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
     th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
-    th{position:sticky;top:93px;background:#0b1220;z-index:4;color:#f8fafc}
+    th{
+    background:#0b1220;
+    color:#f8fafc;
+    position:relative;
+}
     tr:nth-child(even) td{background:rgba(2,6,23,.25)} tr:hover td{background:rgba(249,115,22,.08)}
     .pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 8px;color:var(--muted);font-size:12px}
     .rank{font-weight:800;color:#fbbf24}.small{font-size:12px;color:var(--muted)} .ok{color:var(--good)} .err{color:var(--bad)}
@@ -45,7 +49,7 @@
       <h2>Add Performance</h2>
       <form id="recordForm">
         <label>Athlete</label>
-        <input id="athlete" value="Sean Williams" required />
+        <input id="athlete" value="Elliot" required />
         <div class="row">
           <div>
             <label>Event / Distance</label>
@@ -199,7 +203,7 @@ $("recordForm").addEventListener("submit", async (e)=>{
     render();
   }catch(err){ setStatus("Save failed: " + err.message, false); }
 });
-$("resetBtn").onclick = () => { $("recordForm").reset(); $("athlete").value="Sean Williams"; $("year").value="2026"; };
+$("resetBtn").onclick = () => { $("recordForm").reset(); $("athlete").value="Elliot"; $("year").value="2026"; };
 
 document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));

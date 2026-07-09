@@ -12,7 +12,7 @@ export async function handler(event) {
   try {
     const body = parseBody(event);
     const record = {
-      athlete: String(body.athlete || "Sean Williams").trim(),
+      athlete: String(body.athlete || "Elliot").trim(),
       event_name: String(body.event_name || "").trim(),
       mark: String(body.mark || "").trim(),
       mark_value: body.mark_value === "" || body.mark_value == null ? null : Number(body.mark_value),
