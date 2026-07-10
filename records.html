@@ -35,6 +35,37 @@
     .hidden{display:none}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
     @media(max-width:900px){.summary{grid-template-columns:1fr 1fr}th{top:0}}
     .stat{background:#020617;border:1px solid var(--line);border-radius:12px;padding:12px}.stat b{font-size:22px}
+  
+    .table-wrapper{max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:12px}
+    .table-wrapper table{border:0;border-radius:0;min-width:1000px}
+    .table-wrapper thead th{position:sticky;top:0;z-index:4;background:#0b1220;cursor:pointer;user-select:none}
+    .table-wrapper thead th.no-sort{cursor:default}
+    .progress-card{margin:12px 0;padding:12px;background:#020617;border:1px solid var(--line);border-radius:12px}
+    .progress-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px}
+    .progress-track{height:12px;background:#1e293b;border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+    .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#fbbf24);width:0;transition:width .35s ease}
+    .lower-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .details-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+    .detail{padding:10px;background:#020617;border:1px solid var(--line);border-radius:10px}
+    .detail span{display:block;color:var(--muted);font-size:12px}
+    .chart-wrap{height:300px;position:relative}
+    canvas{width:100%;height:100%;display:block}
+    .empty{padding:30px;text-align:center;color:var(--muted)}
+    .actions{display:flex;gap:6px}
+    .actions button{width:auto;margin:0;padding:7px 10px}
+    button.edit{background:#2563eb;border-color:#2563eb;color:white}
+    .rank.gold{color:#fbbf24}.rank.silver{color:#cbd5e1}.rank.bronze{color:#c08457}
+    .medal{font-size:18px}
+    tr.new-pr td{animation:prFlash 2.4s ease}
+    @keyframes prFlash{0%,45%{background:rgba(34,197,94,.35)}100%{background:transparent}}
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(2,6,23,.78);z-index:50;align-items:center;justify-content:center;padding:18px}
+    .modal-backdrop.show{display:flex}
+    .modal{width:min(650px,100%);max-height:92vh;overflow:auto;background:#111827;border:1px solid var(--line);border-radius:16px;padding:18px}
+    .modal-actions{display:flex;gap:10px}.modal-actions button{flex:1}
+    .sort-arrow{color:var(--accent);font-size:11px;margin-left:4px}
+    @media(max-width:1000px){.lower-grid{grid-template-columns:1fr}}
+    @media(max-width:700px){.details-grid{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body>
@@ -106,7 +137,12 @@
           <button class="secondary" id="exportCsvBtn">Export CSV</button>
         </div>
 
-        <div style="overflow:auto;max-height:72vh">
+        <div class="progress-card">
+          <div class="progress-top"><b>Top 25 progress</b><span id="progressText" class="small">0 of 25 marks</span></div>
+          <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+        </div>
+
+        <div class="table-wrapper">
           <table>
             <thead id="tableHead"></thead>
             <tbody id="tableBody"></tbody>
@@ -115,176 +151,106 @@
       </div>
     </section>
   </div>
+
+  <div class="lower-grid">
+    <section class="card">
+      <h2>Performance Details</h2>
+      <div id="detailsPanel" class="empty">Click a table row to view the full performance.</div>
+    </section>
+    <section class="card">
+      <h2 id="chartTitle">Event Progress</h2>
+      <div class="chart-wrap"><canvas id="eventChart"></canvas></div>
+      <div id="chartEmpty" class="empty">Select an event with dated marks to see its graph.</div>
+    </section>
+  </div>
+
 </main>
 
+
+<div id="editBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <h2>Edit Performance</h2>
+    <input id="editId" type="hidden" />
+    <label>Athlete</label><input id="editAthlete" />
+    <div class="row">
+      <div><label>Event</label><select id="editEvent"></select></div>
+      <div><label>Mark</label><input id="editMark" /></div>
+    </div>
+    <div class="row">
+      <div><label>Month</label><select id="editMonth"><option></option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select></div>
+      <div><label>Year</label><input id="editYear" type="number" /></div>
+    </div>
+    <label>Source / Workout</label><input id="editSource" />
+    <label>Notes</label><textarea id="editNotes" rows="4"></textarea>
+    <div class="modal-actions">
+      <button id="saveEditBtn">Save Changes</button>
+      <button class="secondary" id="cancelEditBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
+
 const EVENTS = [
+
 "10m Fly","20m Fly","30m Fly","40m Fly","50m Fly","60m Fly","80m Fly","90m","100m","120m","145m Blue Mark","150m","200m","250m","300m","350m","400m","500m","600m",
 "5 Hurdles","200mH","400IH H1","400IH H2","400IH H3","400IH H4","400IH H5",
 "400IH H6",
 "400IH H7","400IH H6-10","170m Hills","200m Hills","230m Hills","300m Hills",
 "3 Min Runs","2 Min Runs","Largo Loop 640m","10m Blocks","20m Blocks","30m Blocks","40m Blocks","50m Blocks","60m Blocks","80m Blocks","100m Blocks","120m Non Flying","145m Non Flying","150m Non Flying","200m Non Flying",
 "Box Jump","Seminole Run","20 Min Fartlek","23 Sec Runs","45 Sec Runs","40 Sec Runs"
+
 ];
 
-let records = [];
-let view = "top25";
+const HIGHER_IS_BETTER = ["3 Min Runs","2 Min Runs","45 Sec Runs","40 Sec Runs","23 Sec Runs","23 sec runs","Box Jump"];
+const MONTH_ORDER = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+let records=[], view="top25", selectedRecordId=null, newPrId=null;
+let sortState={key:"rank",direction:"asc"};
 
 function $(id){return document.getElementById(id)}
-function optionize(sel, includeAll=false){
-  sel.innerHTML = includeAll ? '<option value="">All Events</option>' : '';
-  EVENTS.forEach(e=>{const o=document.createElement("option");o.value=e;o.textContent=e;sel.appendChild(o)});
-}
-optionize($("event")); optionize($("filterEvent"), true);
-$("filterEvent").value = "100m";
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function optionize(sel,all=false){sel.innerHTML=all?'<option value="">All Events</option>':'';EVENTS.forEach(e=>{const o=document.createElement("option");o.value=e;o.textContent=e;sel.appendChild(o)})}
+optionize($("event"));optionize($("filterEvent"),true);optionize($("editEvent"));$("filterEvent").value="100m";
 
-function parseMark(mark){
-  if(mark == null) return null;
-  const s = String(mark).trim();
-  if(!s) return null;
-  if(s.includes(":")){
-    const parts = s.split(":").map(Number);
-    if(parts.length===2) return parts[0]*60 + parts[1];
-    if(parts.length===3) return parts[0]*3600 + parts[1]*60 + parts[2];
-  }
-  const n = Number(s.replace(/[^\d.]/g,""));
-  return Number.isFinite(n) ? n : null;
-}
-function isDistanceEvent(ev){ return !["3 Min Runs","2 Min Runs","45 Sec Runs","40 Sec Runs","Box Jump"].includes(ev); }
-function compareRecords(a,b){
-  const av=parseMark(a.mark), bv=parseMark(b.mark);
-  if(["3 Min Runs","2 Min Runs","45 Sec Runs","40 Sec Runs","Box Jump"].includes(a.event_name)) return (bv??-Infinity)-(av??-Infinity);
-  return (av??Infinity)-(bv??Infinity);
-}
-function rankedForEvent(ev){
-  return records.filter(r=>!ev||r.event_name===ev).sort(compareRecords).map((r,i)=>({...r,rank:i+1}));
-}
+function parseMark(mark){const s=String(mark??"").trim();if(!s)return null;if(s.includes(":")){const p=s.split(":").map(Number);return p.length===2?p[0]*60+p[1]:p[0]*3600+p[1]*60+p[2]}const n=Number(s.replace(/[^\d.]/g,""));return Number.isFinite(n)?n:null}
+function compareRecords(a,b){const av=parseMark(a.mark),bv=parseMark(b.mark);return HIGHER_IS_BETTER.includes(a.event_name)?(bv??-Infinity)-(av??-Infinity):(av??Infinity)-(bv??Infinity)}
+function rankedForEvent(ev){return records.filter(r=>!ev||r.event_name===ev).slice().sort(compareRecords).map((r,i)=>({...r,rank:i+1}))}
 function top25ForEvent(ev){return rankedForEvent(ev).slice(0,25)}
 function csvEscape(v){return `"${String(v??"").replaceAll('"','""')}"`}
 
-async function api(path, opts={}){
-  const res = await fetch("/.netlify/functions/" + path, {
-    headers: {"Content-Type":"application/json"},
-    ...opts
-  });
-  let data = null;
-  try { data = await res.json(); } catch(e) {}
-  if(!res.ok) throw new Error((data && data.error) || res.statusText);
-  return data;
-}
-async function loadRecords(){
-  setStatus("Loading records...");
-  try{
-    const data = await api("get-records");
-    records = data.records || [];
-    setStatus("Loaded " + records.length + " records.", true);
-    render();
-  }catch(e){
-    setStatus("Could not load records: " + e.message, false);
-  }
-}
-function setStatus(msg, ok=true){ $("status").innerHTML = `<span class="${ok?'ok':'err'}">${msg}</span>`; }
+async function api(path,opts={}){const res=await fetch("/.netlify/functions/"+path,{headers:{"Content-Type":"application/json"},...opts});let data=null;try{data=await res.json()}catch{}if(!res.ok)throw new Error((data&&data.error)||res.statusText);return data}
+function setStatus(msg,ok=true){$("status").innerHTML=`<span class="${ok?'ok':'err'}">${esc(msg)}</span>`}
+async function loadRecords(){setStatus("Loading records...");try{const d=await api("get-records");records=d.records||[];setStatus("Loaded "+records.length+" records.",true);render()}catch(e){setStatus("Could not load records: "+e.message,false)}}
 
-$("recordForm").addEventListener("submit", async (e)=>{
-  e.preventDefault();
-  const payload = {
-    athlete: $("athlete").value.trim(),
-    event_name: $("event").value,
-    mark: $("mark").value.trim(),
-    mark_value: parseMark($("mark").value),
-    month: $("month").value,
-    year: Number($("year").value || new Date().getFullYear()),
-    source: $("source").value.trim(),
-    notes: $("notes").value.trim()
-  };
-  try{
-    const data = await api("add-record", {method:"POST", body:JSON.stringify(payload)});
-    records.unshift(data.record);
-    setStatus("Saved performance.", true);
-    $("mark").value=""; $("source").value=""; $("notes").value="";
-    render();
-  }catch(err){ setStatus("Save failed: " + err.message, false); }
-});
-$("resetBtn").onclick = () => { $("recordForm").reset(); $("athlete").value="Elliot"; $("year").value="2026"; };
+$("recordForm").addEventListener("submit",async e=>{e.preventDefault();const ev=$("event").value,oldBest=rankedForEvent(ev)[0];const payload={athlete:$("athlete").value.trim(),event_name:ev,mark:$("mark").value.trim(),mark_value:parseMark($("mark").value),month:$("month").value,year:Number($("year").value||new Date().getFullYear()),source:$("source").value.trim(),notes:$("notes").value.trim()};try{const d=await api("add-record",{method:"POST",body:JSON.stringify(payload)});records.unshift(d.record);const nb=rankedForEvent(ev)[0];if(nb?.id===d.record.id&&(!oldBest||compareRecords(d.record,oldBest)<0)){newPrId=d.record.id;setStatus("New personal best saved: "+d.record.mark+" in "+ev+"!",true)}else setStatus("Saved performance.",true);$("mark").value="";$("source").value="";$("notes").value="";$("filterEvent").value=ev;render();setTimeout(()=>{newPrId=null;renderTable()},2600)}catch(err){setStatus("Save failed: "+err.message,false)}});
+$("resetBtn").onclick=()=>{$("recordForm").reset();$("athlete").value="Elliot";$("year").value="2026"};
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));btn.classList.add("active");view=btn.dataset.view;render()});
+$("filterEvent").onchange=()=>{selectedRecordId=null;render()};$("search").oninput=renderTable;$("refreshBtn").onclick=loadRecords;
+$("exportCsvBtn").onclick=()=>{const rows=getDisplayRows(),header=["rank","athlete","event","mark","month","year","source","notes","created_at"];const csv=[header.join(",")].concat(rows.map(r=>header.map(h=>csvEscape(h==="event"?r.event_name:r[h])).join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="mighty-burner-records.csv";a.click()};
 
-document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
-  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active"); view=btn.dataset.view; render();
-});
-$("filterEvent").onchange=render; $("search").oninput=render; $("refreshBtn").onclick=loadRecords;
+async function deleteRecord(id){if(!confirm("Delete this performance?"))return;try{await api("delete-record",{method:"POST",body:JSON.stringify({id})});records=records.filter(r=>r.id!==id);if(selectedRecordId===id)selectedRecordId=null;render()}catch(e){alert("Delete failed: "+e.message)}}
+window.deleteRecord=deleteRecord;
 
-$("exportCsvBtn").onclick=()=>{
-  const rows = filteredRows();
-  const header = ["rank","athlete","event","mark","month","year","source","notes","created_at"];
-  const csv = [header.join(",")].concat(rows.map(r=>header.map(h=>csvEscape(h==="event"?r.event_name:r[h])).join(","))).join("\n");
-  const blob = new Blob([csv],{type:"text/csv"});
-  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="mighty-burner-records.csv"; a.click();
-};
+function openEdit(id){const r=records.find(x=>x.id===id);if(!r)return;$("editId").value=r.id;$("editAthlete").value=r.athlete||"";$("editEvent").value=r.event_name||"";$("editMark").value=r.mark||"";$("editMonth").value=r.month||"";$("editYear").value=r.year||"";$("editSource").value=r.source||"";$("editNotes").value=r.notes||"";$("editBackdrop").classList.add("show")}
+window.openEdit=openEdit;$("cancelEditBtn").onclick=()=>$("editBackdrop").classList.remove("show");$("editBackdrop").onclick=e=>{if(e.target===$("editBackdrop"))$("editBackdrop").classList.remove("show")};
+$("saveEditBtn").onclick=async()=>{const id=$("editId").value,payload={id,athlete:$("editAthlete").value.trim(),event_name:$("editEvent").value,mark:$("editMark").value.trim(),mark_value:parseMark($("editMark").value),month:$("editMonth").value,year:Number($("editYear").value)||null,source:$("editSource").value.trim(),notes:$("editNotes").value.trim()};try{const d=await api("update-record",{method:"POST",body:JSON.stringify(payload)});records=records.map(r=>r.id===id?d.record:r);$("editBackdrop").classList.remove("show");setStatus("Performance updated.",true);render()}catch(e){alert("Update failed: "+e.message)}};
 
-async function deleteRecord(id){
-  if(!confirm("Delete this performance?")) return;
-  try{
-    await api("delete-record", {method:"POST", body:JSON.stringify({id})});
-    records = records.filter(r=>r.id!==id);
-    render();
-  }catch(e){ alert("Delete failed: "+e.message); }
-}
-window.deleteRecord = deleteRecord;
+function getBaseRows(){const ev=$("filterEvent").value;let rows=[];if(view==="top25")rows=ev?top25ForEvent(ev):EVENTS.flatMap(event=>top25ForEvent(event).map(r=>({...r,event_name:event})));else if(view==="notTop25"){if(ev){const ids=new Set(top25ForEvent(ev).map(r=>r.id));rows=rankedForEvent(ev).filter(r=>!ids.has(r.id))}else rows=EVENTS.flatMap(event=>{const ids=new Set(top25ForEvent(event).map(r=>r.id));return rankedForEvent(event).filter(r=>!ids.has(r.id))})}else if(view==="yearBests"){const src=ev?records.filter(r=>r.event_name===ev):records,map=new Map();src.forEach(r=>{const k=r.event_name+"|"+r.year;if(!map.has(k)||compareRecords(r,map.get(k))<0)map.set(k,r)});rows=Array.from(map.values())}else rows=ev?rankedForEvent(ev):records.slice();return rows}
+function getDisplayRows(){let rows=getBaseRows(),q=$("search").value.toLowerCase().trim();if(q)rows=rows.filter(r=>[r.athlete,r.event_name,r.mark,r.month,r.year,r.source,r.notes].join(" ").toLowerCase().includes(q));const key=sortState.key,dir=sortState.direction==="asc"?1:-1;return rows.slice().sort((a,b)=>{let av,bv;if(key==="rank"){av=a.rank??9999;bv=b.rank??9999}else if(key==="mark"){av=parseMark(a.mark);bv=parseMark(b.mark)}else if(key==="date"){av=(Number(a.year)||0)*100+(MONTH_ORDER[a.month]||0);bv=(Number(b.year)||0)*100+(MONTH_ORDER[b.month]||0)}else{av=String(a[key]??"").toLowerCase();bv=String(b[key]??"").toLowerCase()}return av<bv?-dir:av>bv?dir:0})}
+function setSort(key){if(sortState.key===key)sortState.direction=sortState.direction==="asc"?"desc":"asc";else sortState={key,direction:"asc"};renderTable()}window.setSort=setSort;
+function arrow(k){return sortState.key===k?`<span class="sort-arrow">${sortState.direction==="asc"?"▲":"▼"}</span>`:""}
+function medal(r){return r===1?"🥇":r===2?"🥈":r===3?"🥉":""}function rankClass(r){return r===1?"gold":r===2?"silver":r===3?"bronze":""}
 
-function filteredRows(){
-  const ev=$("filterEvent").value, q=$("search").value.toLowerCase().trim();
-  let rows = [];
-  if(view==="top25"){
-    rows = ev ? top25ForEvent(ev) : EVENTS.flatMap(event=>top25ForEvent(event).map(r=>({...r,event_name:event})));
-  } else if(view==="notTop25"){
-    if(ev){
-      const ids = new Set(top25ForEvent(ev).map(r=>r.id));
-      rows = rankedForEvent(ev).filter(r=>!ids.has(r.id));
-    } else {
-      rows = EVENTS.flatMap(event=>{
-        const ids = new Set(top25ForEvent(event).map(r=>r.id));
-        return rankedForEvent(event).filter(r=>!ids.has(r.id));
-      });
-    }
-  } else if(view==="yearBests"){
-    const source = ev ? records.filter(r=>r.event_name===ev) : records;
-    const map = new Map();
-    source.forEach(r=>{
-      const key = r.event_name + "|" + r.year;
-      if(!map.has(key) || compareRecords(r,map.get(key))<0) map.set(key,r);
-    });
-    rows = Array.from(map.values()).sort((a,b)=>String(a.event_name).localeCompare(b.event_name)||Number(b.year)-Number(a.year));
-  } else {
-    rows = ev ? rankedForEvent(ev) : records.slice().sort((a,b)=>String(a.event_name).localeCompare(b.event_name)||compareRecords(a,b));
-  }
-  if(q) rows = rows.filter(r=>[r.athlete,r.event_name,r.mark,r.month,r.year,r.source,r.notes].join(" ").toLowerCase().includes(q));
-  return rows;
-}
+function renderTable(){const rows=getDisplayRows();$("tableHead").innerHTML=`<tr><th onclick="setSort('rank')">Rank${arrow('rank')}</th><th onclick="setSort('athlete')">Athlete${arrow('athlete')}</th><th onclick="setSort('event_name')">Event${arrow('event_name')}</th><th onclick="setSort('mark')">Mark${arrow('mark')}</th><th onclick="setSort('date')">Date${arrow('date')}</th><th onclick="setSort('source')">Source${arrow('source')}</th><th onclick="setSort('notes')">Notes${arrow('notes')}</th><th class="no-sort">Actions</th></tr>`;if(!rows.length){$("tableBody").innerHTML='<tr><td colspan="8" class="empty">No records match this view.</td></tr>';return}$("tableBody").innerHTML=rows.map((r,i)=>{const rank=r.rank||(view==="history"?"":i+1);return `<tr class="${r.id===newPrId?'new-pr':''}" onclick="showDetails('${r.id}')"><td><span class="medal">${medal(rank)}</span> <span class="rank ${rankClass(rank)}">${rank||""}</span></td><td>${esc(r.athlete||"")}</td><td><span class="pill">${esc(r.event_name||"")}</span></td><td><b>${esc(r.mark||"")}</b></td><td>${esc([r.month,r.year].filter(Boolean).join(" "))}</td><td>${esc(r.source||"")}</td><td>${esc(r.notes||"")}</td><td><div class="actions"><button class="edit" onclick="event.stopPropagation();openEdit('${r.id}')">Edit</button><button class="danger" onclick="event.stopPropagation();deleteRecord('${r.id}')">Delete</button></div></td></tr>`}).join("")}
 
-function render(){
-  const ev=$("filterEvent").value;
-  const rows = filteredRows();
-  $("totalMarks").textContent = records.length;
-  $("totalEvents").textContent = new Set(records.map(r=>r.event_name)).size;
-  const eventRows = ev ? rankedForEvent(ev) : [];
-  $("eventPb").textContent = ev && eventRows[0] ? eventRows[0].mark : "—";
-  $("cutoff").textContent = ev && eventRows[24] ? eventRows[24].mark : (ev ? "Under 25 marks" : "—");
+function showDetails(id){selectedRecordId=id;const r=records.find(x=>x.id===id);if(!r)return;const ranked=rankedForEvent(r.event_name),rank=ranked.findIndex(x=>x.id===id)+1;$("detailsPanel").innerHTML=`<div class="details-grid"><div class="detail"><span>Rank</span><b>${rank?("#"+rank):"—"} ${medal(rank)}</b></div><div class="detail"><span>Mark</span><b>${esc(r.mark||"")}</b></div><div class="detail"><span>Athlete</span><b>${esc(r.athlete||"")}</b></div><div class="detail"><span>Event</span><b>${esc(r.event_name||"")}</b></div><div class="detail"><span>Date</span><b>${esc([r.month,r.year].filter(Boolean).join(" ")||"Unknown")}</b></div><div class="detail"><span>Source</span><b>${esc(r.source||"—")}</b></div></div><div class="detail" style="margin-top:10px"><span>Notes</span><b>${esc(r.notes||"—")}</b></div><button class="edit" onclick="openEdit('${r.id}')">Edit This Performance</button>`}window.showDetails=showDetails;
 
-  $("tableHead").innerHTML = `<tr><th>Rank</th><th>Athlete</th><th>Event</th><th>Mark</th><th>Date</th><th>Source</th><th>Notes</th><th></th></tr>`;
-  $("tableBody").innerHTML = rows.map((r,idx)=>`
-    <tr>
-      <td><span class="rank">${r.rank || (view==="history" ? "" : idx+1)}</span></td>
-      <td>${r.athlete||""}</td>
-      <td><span class="pill">${r.event_name||""}</span></td>
-      <td><b>${r.mark||""}</b></td>
-      <td>${[r.month,r.year].filter(Boolean).join(" ")}</td>
-      <td>${r.source||""}</td>
-      <td>${r.notes||""}</td>
-      <td><button class="danger" style="width:auto;margin:0;padding:6px 8px" onclick="deleteRecord('${r.id}')">Delete</button></td>
-    </tr>`).join("");
-}
+function renderProgress(){const ev=$("filterEvent").value,count=ev?rankedForEvent(ev).length:0,c=Math.min(count,25);$("progressText").textContent=ev?`${c} of 25 Top-25 spots filled (${count} total marks)`:"Select one event to view progress";$("progressFill").style.width=ev?`${c/25*100}%`:"0%"}
+function drawChart(){const ev=$("filterEvent").value,canvas=$("eventChart"),empty=$("chartEmpty"),ctx=canvas.getContext("2d"),rows=ev?records.filter(r=>r.event_name===ev&&r.year&&parseMark(r.mark)!=null).slice().sort((a,b)=>((Number(a.year)||0)*100+(MONTH_ORDER[a.month]||0))-((Number(b.year)||0)*100+(MONTH_ORDER[b.month]||0))):[];$("chartTitle").textContent=ev?ev+" Progress":"Event Progress";const rect=canvas.parentElement.getBoundingClientRect();canvas.width=Math.max(500,Math.floor(rect.width*devicePixelRatio));canvas.height=Math.floor(300*devicePixelRatio);ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);ctx.clearRect(0,0,rect.width,300);if(rows.length<2){canvas.style.display="none";empty.style.display="block";empty.textContent="At least two dated marks are needed for this event graph.";return}canvas.style.display="block";empty.style.display="none";const W=rect.width,H=300,p={l:52,r:20,t:20,b:50},vals=rows.map(r=>parseMark(r.mark));let min=Math.min(...vals),max=Math.max(...vals);if(min===max){min-=1;max+=1}const range=max-min;ctx.strokeStyle="#334155";ctx.fillStyle="#94a3b8";ctx.font="12px system-ui";for(let i=0;i<=4;i++){const y=p.t+(H-p.t-p.b)*(i/4);ctx.beginPath();ctx.moveTo(p.l,y);ctx.lineTo(W-p.r,y);ctx.stroke();const val=HIGHER_IS_BETTER.includes(ev)?max-range*(i/4):min+range*(i/4);ctx.fillText(val.toFixed(val<10?2:1),5,y+4)}const x=i=>p.l+(W-p.l-p.r)*(i/(rows.length-1)),y=v=>HIGHER_IS_BETTER.includes(ev)?p.t+(max-v)/range*(H-p.t-p.b):p.t+(v-min)/range*(H-p.t-p.b);ctx.strokeStyle="#f97316";ctx.lineWidth=3;ctx.beginPath();rows.forEach((r,i)=>{const xx=x(i),yy=y(parseMark(r.mark));i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy)});ctx.stroke();rows.forEach((r,i)=>{const xx=x(i),yy=y(parseMark(r.mark));ctx.fillStyle="#fbbf24";ctx.beginPath();ctx.arc(xx,yy,4,0,Math.PI*2);ctx.fill()})}
 
-loadRecords();
+function render(){const ev=$("filterEvent").value,eventRows=ev?rankedForEvent(ev):[];$("totalMarks").textContent=records.length;$("totalEvents").textContent=new Set(records.map(r=>r.event_name)).size;$("eventPb").textContent=eventRows[0]?.mark||"—";$("cutoff").textContent=eventRows[24]?.mark||(ev?"Under 25 marks":"—");renderProgress();renderTable();drawChart();if(selectedRecordId)showDetails(selectedRecordId)}
+window.addEventListener("resize",()=>requestAnimationFrame(drawChart));loadRecords();
+
 </script>
 </body>
 </html>
