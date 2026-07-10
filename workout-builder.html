@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sprint Workout Designer</title>
+<style>
+:root{--bg:#0d1324;--panel:#151d33;--panel2:#1f2a46;--text:#edf2ff;--muted:#aeb9d2;--accent:#72d2ff;--accent2:#9cff9c;--warn:#ffd37a;--bad:#ff8a8a;--border:#2d3a5d;--shadow:0 15px 50px rgba(0,0,0,.35)}
+*{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top left,#1e315b 0,#0d1324 45%,#070b14 100%);color:var(--text)}
+header{padding:28px 18px 16px;max-width:1240px;margin:0 auto} h1{margin:0;font-size:clamp(28px,4vw,48px);letter-spacing:-1px}.sub{color:var(--muted);margin-top:8px;max-width:920px;line-height:1.45}.wrap{max-width:1240px;margin:0 auto;padding:0 18px 30px;display:grid;grid-template-columns:370px 1fr;gap:18px}.card{background:rgba(21,29,51,.94);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:18px}.controls{position:sticky;top:12px;align-self:start}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:6px}select,input,textarea{width:100%;background:#0c1222;border:1px solid var(--border);color:var(--text);border-radius:12px;padding:11px 12px;font-size:14px}textarea{min-height:70px;resize:vertical}button{border:0;border-radius:12px;padding:11px 14px;background:linear-gradient(135deg,#45c7ff,#7cf5bb);color:#07101e;font-weight:800;cursor:pointer}button.secondary{background:#263451;color:var(--text);border:1px solid var(--border)}button.ghost{background:transparent;color:var(--accent);border:1px solid var(--border)}button.small{padding:7px 10px;border-radius:9px;font-size:12px}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}.tab{background:#10182c;border:1px solid var(--border);padding:9px 12px;border-radius:99px;color:var(--muted);cursor:pointer}.tab.active{color:#07101e;background:var(--accent);border-color:transparent;font-weight:800}.section{display:none}.section.active{display:block}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.kpi{background:#0c1222;border:1px solid var(--border);border-radius:14px;padding:12px}.kpi b{display:block;font-size:22px}.kpi span{color:var(--muted);font-size:12px}.workout{background:linear-gradient(180deg,rgba(31,42,70,.98),rgba(18,26,46,.98));border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:12px}.workout h3{margin:0 0 5px;font-size:20px}.pill{font-size:12px;background:#0c1222;border:1px solid var(--border);border-radius:99px;padding:5px 8px;color:var(--muted);display:inline-flex;gap:4px;align-items:center}.pill.good{color:var(--accent2)}.pill.warn{color:var(--warn)}.pill.bad{color:var(--bad)}table{width:100%;border-collapse:collapse;margin-top:12px;overflow:hidden;border-radius:12px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--border);font-size:13px}th{color:var(--muted);font-weight:700;background:#0c1222}.explain{display:none;margin-top:12px;color:#d8e2f7;line-height:1.45;background:#0c1222;border:1px solid var(--border);border-radius:12px;padding:12px}.muted{color:var(--muted)}.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.library{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.builder-line{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 38px;gap:8px;margin-bottom:8px}.note{font-size:13px;color:var(--muted);line-height:1.45}.source{font-size:12px;color:var(--muted);line-height:1.5}.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px} @media(max-width:920px){.wrap{grid-template-columns:1fr}.controls{position:static}.kpis{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.builder-line{grid-template-columns:1fr 1fr}.hide-sm{display:none}} @media print{body{background:#fff;color:#000}.controls,.tabs,.no-print{display:none}.wrap{display:block}.card,.workout{box-shadow:none;border:1px solid #aaa;background:#fff;color:#000}.section{display:block}.section:not(.active){display:none}.pill,.kpi,th{background:#f2f2f2;color:#000}}
+</style>
+</head>
+<body>
+<header><h1>Sprint Workout Designer</h1><div class="sub">Pick the training focus, event, volume, pace source, and phase. The app recommends multi-distance sessions, calculates target times, and lets you build workouts like <b>300-200-100</b>, <b>250 + 150 + 150</b>, or broken 400s.</div><div id="dbStatus" class="source" style="margin-top:8px">Loading workout database...</div></header>
+<div class="wrap">
+<aside class="card controls">
+  <div class="grid">
+    <div><label>Event</label><select id="event"><option>100</option><option>100H</option><option>110H</option><option>200</option><option selected>400</option><option>400H</option><option>General Sprints</option></select></div>
+    <div><label>Focus</label><select id="focus"><option>Acceleration</option><option>Max Velocity</option><option selected>Speed Endurance</option><option>Specific Endurance</option><option>Special Endurance I</option><option>Special Endurance II</option><option>Race Modeling</option><option>Lactate Tolerance</option><option>Intensive Tempo</option><option>Extensive Tempo</option><option>Hills</option><option>Hurdles</option><option>Recovery</option></select></div>
+    <div><label>Total Volume Target</label><select id="volume"><option value="any">Any</option><option>300</option><option>400</option><option>500</option><option selected>600</option><option>700</option><option>800</option><option>1000</option><option>1200</option><option>1600</option></select></div>
+    <div><label>Season Phase</label><select id="phase"><option>General Prep</option><option selected>Specific Prep</option><option>Pre-Competition</option><option>Competition</option><option>Championship</option></select></div>
+    <div><label>Athlete Level</label><select id="level"><option>Middle School</option><option selected>High School</option><option>College</option><option>Elite/Masters</option></select></div>
+    <div><label>Pace Bias</label><select id="paceBias"><option value="auto" selected>Auto by workout</option><option value="100">100m PB</option><option value="200">200m PB</option><option value="400">400m PB</option><option value="race400">400 Race Model</option></select></div>
+  </div>
+  <hr style="border-color:var(--border);border-style:solid;border-width:1px 0 0;margin:16px 0">
+  <div class="grid">
+    <div><label>100m PB</label><input id="pb100" value="11.48"></div>
+    <div><label>200m PB</label><input id="pb200" value="22.22"></div>
+    <div><label>400m PB/Goal</label><input id="pb400" value="49.00"></div>
+    <div><label>Intensity Override</label><select id="intensityOverride"><option value="auto">Auto</option><option value="1">100%</option><option value=".97">97%</option><option value=".95">95%</option><option value=".93">93%</option><option value=".90">90%</option><option value=".85">85%</option><option value=".80">80%</option><option value=".70">70%</option></select></div>
+  </div>
+  <div class="row" style="margin-top:14px"><button onclick="renderRecommendations()">Build Workouts</button><button class="secondary" onclick="window.print()">Print</button></div>
+  <p class="note">Tip: for 400m pace work, enter either current 400 PB or goal. For race modeling, the app also estimates first 200 as 200 PB + 1 and second 200 as 200 PB + 2 to 3.</p>
+</aside>
+<main class="card">
+  <div class="tabs no-print"><div class="tab active" onclick="showTab('recommendations',this)">Recommended</div><div class="tab" onclick="showTab('builder',this)">Custom Builder</div><div class="tab" onclick="showTab('library',this)">Workout Library</div><div class="tab" onclick="showTab('pace',this)">Pace Chart</div><div class="tab" onclick="showTab('sources',this)">Sources/Rules</div></div>
+  <section id="recommendations" class="section active"><div class="kpis" id="kpis"></div><div id="results"></div></section>
+  <section id="builder" class="section"><h2>Custom Workout Builder</h2><p class="muted">Build mixed sessions like 300 / 90 sec / 200 / 2 min / 100 or 250 / 90 sec / 150 x2.</p><div id="builderLines"></div><div class="row"><button class="secondary" onclick="addLine()">Add Segment</button><button onclick="renderCustom()">Calculate Custom Workout</button><button class="ghost" onclick="saveCustomWorkout()">Save to Browser Library</button></div><div id="customOutput"></div></section>
+  <section id="library" class="section"><h2>Workout Library</h2><div class="row" style="margin-bottom:12px"><input id="libSearch" placeholder="Search: 300, hills, hurdles, lactate, fly, tempo..." oninput="renderLibrary()"><button class="secondary" onclick="document.getElementById('libSearch').value='';renderLibrary()">Clear</button></div><div id="libraryList" class="library"></div></section>
+  <section id="pace" class="section"><h2>Pace Chart</h2><p class="muted">Target times are calculated from the PB pace source and intensity. Lower intensity means slower target time.</p><div id="paceChart"></div></section>
+  <section id="sources" class="section"><h2>Training Rules Used</h2><div class="source"><p><b>Speed / Max V:</b> high intensity, low volume, full recovery; acceleration under 40m, max velocity through fly segments after a build.</p><p><b>Speed Endurance:</b> usually 70–150m reps, 90–100% intensity, with enough recovery to keep quality high.</p><p><b>Specific/Special Endurance:</b> 150–300m+ reps or split runs for race rhythm, lactate tolerance, and finishing capacity. Recovery ranges from incomplete for broken reps to near-complete for high-quality special endurance.</p><p><b>Tempo:</b> lower intensity, higher volume, incomplete recoveries.</p><p><b>References embedded into design:</b><br>https://www.trackandfieldcoach.com/blog/sprinting-workouts-concepts-and-design<br>https://speedendurance.com/wp-content/uploads/ebooks/UKA-Michael_Khmel%26Tony_Lester_CLASSIFYING_SPRINT_TRAINING_METHODS.pdf<br>https://coachathletics.com.au/coaching-education/energy-system-chart-how-to-train-maximum-speed-speed-endurance-and-tempo</p></div></section>
+</main>
+</div>
+<script>
+let workouts = [];
+
+async function workoutApi(path, opts={}){
+  const response = await fetch("/.netlify/functions/" + path, {
+    headers: {"Content-Type":"application/json"},
+    ...opts
+  });
+  let data = null;
+  try { data = await response.json(); } catch {}
+  if(!response.ok) throw new Error(data?.error || response.statusText);
+  return data;
+}
+function dbToWorkout(r){
+  const segments = Array.isArray(r.segments) ? r.segments : [];
+  return {
+    id:r.id,
+    n:r.name,
+    f:r.category,
+    ev:Array.isArray(r.events) && r.events.length ? r.events : ["General Sprints"],
+    vol:Number(r.total_volume_m)||0,
+    l:r.level||"All",
+    p:Array.isArray(r.phases) && r.phases.length ? r.phases : ["General Prep","Specific Prep","Pre-Competition","Competition"],
+    purpose:r.details||"",
+    cues:r.coaching_cues||"",
+    segments,
+    repScheme:r.rep_scheme||"",
+    restSummary:r.rest||"",
+    intensityMin:r.intensity_min,
+    intensityMax:r.intensity_max,
+    source:r.source||"",
+    sourceReference:r.source_reference||"",
+    tags:Array.isArray(r.tags)?r.tags:[]
+  };
+}
+async function loadWorkoutDatabase(){
+  const status=document.getElementById("dbStatus");
+  try{
+    const data=await workoutApi("get-workouts");
+    workouts=(data.workouts||[]).map(dbToWorkout);
+    status.textContent=`Loaded ${workouts.length} workouts from Supabase.`;
+    status.style.color="var(--accent2)";
+  }catch(error){
+    status.textContent="Could not load workout database: "+error.message;
+    status.style.color="var(--bad)";
+    workouts=[];
+  }
+}
+
+function num(id){return parseFloat(document.getElementById(id).value)||0} function selected(id){return document.getElementById(id).value}
+function fmtTime(x){if(!isFinite(x)||x<=0)return '—'; if(x>=60){let m=Math.floor(x/60),s=(x-60*m).toFixed(1).padStart(4,'0');return `${m}:${s}`} return x.toFixed(2)}
+function paceTime(d,basis,intensity){let pb100=num('pb100'),pb200=num('pb200'),pb400=num('pb400'); let over=selected('intensityOverride'); if(over!=='auto') intensity=parseFloat(over); let bias=selected('paceBias'); if(bias!=='auto') basis=bias; if(d<=0)return NaN; if(basis==='100') return (pb100*(d/100))/intensity; if(basis==='200') return (pb200*(d/200))/intensity; if(basis==='400') return (pb400*(d/400))/intensity; if(basis==='race400'){ if(d===200) return pb200+1.5; if(d===300) return (pb200+1)+(pb200+2.5)/2; return (pb400*(d/400))/intensity; } return (pb400*(d/400))/intensity; }
+function volumeOf(w){const segs=Array.isArray(w.segments)?w.segments:[];return segs.reduce((a,s)=>a+((Number(s.r)||1)*(Number(s.d)||0)),0)||Number(w.vol)||0}
+function score(w){let sc=0, ev=selected('event'), f=selected('focus'), vol=selected('volume'), phase=selected('phase'), level=selected('level'); if(w.f===f)sc+=40; if(w.ev.includes(ev)||w.ev.includes('General Sprints'))sc+=25; if(w.p.includes(phase))sc+=15; if(w.l===level)sc+=8; if(vol==='any')sc+=8; else{let target=+vol, v=volumeOf(w); sc+=Math.max(0,15-Math.abs(v-target)/40)} return sc}
+function workoutTable(w){
+  const segs=Array.isArray(w.segments)?w.segments:[];
+  if(!segs.length){
+    const intensity=(w.intensityMin||w.intensityMax)
+      ? `${w.intensityMin||w.intensityMax}${w.intensityMax&&w.intensityMax!==w.intensityMin?`-${w.intensityMax}`:""}%`
+      : "Varies";
+    return `<table><thead><tr><th>Prescription</th><th>Intensity</th><th>Rest</th><th>Source</th></tr></thead>
+      <tbody><tr><td>${w.repScheme||"See workout details"}</td><td>${intensity}</td><td>${w.restSummary||"As prescribed"}</td><td>${w.source||""}</td></tr></tbody></table>`;
+  }
+  let rows='',total=0;
+  segs.forEach((s,idx)=>{
+    let t=paceTime(s.d,s.b||'400',s.i||.90);
+    total+=(Number(s.r)||1)*(Number(s.d)||0);
+    rows+=`<tr><td>${s.set||''}</td><td>${s.r||1} x ${s.d||'Time'}m</td><td>${Math.round((selected('intensityOverride')==='auto'?(s.i||.90):parseFloat(selected('intensityOverride')))*100)}%</td><td>${s.b||'400'}</td><td>${fmtTime(t)} each</td><td>${(s.r||1)>1&&isFinite(t)?fmtTime(t*(s.r||1)):fmtTime(t)}</td><td>${s.rest||''}</td><td>${s.note||''}</td></tr>`
+  });
+  return `<table><thead><tr><th>Set</th><th>Rep</th><th>Intensity</th><th>Pace</th><th>Target</th><th>Block Time</th><th>Rest</th><th>Note</th></tr></thead><tbody>${rows}</tbody></table>`
+}
+function card(w,rank=''){
+  let v=volumeOf(w);
+  let load=v>=1000?'bad':v>=700?'warn':'good';
+  const usable=Array.isArray(w.segments)&&w.segments.length;
+  return `<div class="workout"><div class="row"><h3>${rank}${w.n}</h3><span class="pill good">${w.f}</span><span class="pill">${v||'Timed/Technical'}m</span><span class="pill ${load}">${w.l}</span></div>
+    <div class="muted">${w.purpose}</div>${workoutTable(w)}
+    <div class="source" style="margin-top:8px"><b>Source:</b> ${w.source||'Mighty Burner'}${w.sourceReference?` — ${w.sourceReference}`:''}</div>
+    <div class="row no-print" style="margin-top:10px"><button class="small secondary" onclick="toggleExplain(this)">Explain</button>
+    ${usable?`<button class="small ghost" onclick='loadWorkout(${JSON.stringify(w.n)})'>Load in Builder</button>`:''}</div>
+    <div class="explain"><b>Why this works:</b> ${w.purpose}<br><b>Coaching cues:</b> ${w.cues}<br><b>Best use:</b> ${(w.p||[]).join(', ')} for ${(w.ev||[]).join(', ')}.</div></div>`
+}
+function renderRecommendations(){let ranked=[...workouts].sort((a,b)=>score(b)-score(a)).slice(0,12); let totalAvg=ranked.length?Math.round(ranked.reduce((a,w)=>a+volumeOf(w),0)/ranked.length):0; document.getElementById('kpis').innerHTML=`<div class="kpi"><b>${ranked.length}</b><span>workouts shown</span></div><div class="kpi"><b>${totalAvg}m</b><span>avg volume</span></div><div class="kpi"><b>${selected('focus')}</b><span>focus</span></div><div class="kpi"><b>${fmtTime(num('pb200')+1)} / ${fmtTime(num('pb200')+2.5)}</b><span>400 model 200 splits</span></div>`; document.getElementById('results').innerHTML=ranked.map((w,i)=>card(w,(i+1)+'. ')).join('')||'<div class="empty">No workouts match. Try Any volume.</div>'; renderPaceChart(); renderLibrary();}
+function toggleExplain(btn){let el=btn.parentElement.nextElementSibling; el.style.display=el.style.display==='block'?'none':'block'}
+function showTab(id,el){document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active'); if(id==='pace')renderPaceChart(); if(id==='library')renderLibrary();}
+function addLine(seg={d:100,r:1,rest:'5 min',i:.95,b:'100'}){let div=document.createElement('div');div.className='builder-line';div.innerHTML=`<input placeholder="Distance" value="${seg.d}"><input placeholder="Reps" value="${seg.r}"><input placeholder="Rest" value="${seg.rest}"><select><option value="100">100m PB</option><option value="200">200m PB</option><option value="400">400m PB</option><option value="race400">400 Race</option></select><button class="secondary" onclick="this.parentElement.remove()">×</button>`;div.querySelector('select').value=seg.b||'100';document.getElementById('builderLines').appendChild(div)}
+function getCustom(){return [...document.querySelectorAll('#builderLines .builder-line')].map(l=>({d:parseFloat(l.children[0].value)||0,r:parseInt(l.children[1].value)||1,rest:l.children[2].value||'',b:l.children[3].value,i:selected('intensityOverride')==='auto'? .95:parseFloat(selected('intensityOverride'))}))}
+function renderCustom(){let segs=getCustom(); let w={n:'Custom Workout',f:selected('focus'),ev:[selected('event')],vol:segs.reduce((a,s)=>a+s.d*s.r,0),l:selected('level'),p:[selected('phase')],purpose:'Custom mixed-distance session.',cues:'Watch rep quality and adjust rest before mechanics drop.',segments:segs};document.getElementById('customOutput').innerHTML=card(w)}
+async function saveCustomWorkout(){
+  let segs=getCustom();
+  let name=prompt('Name this workout','My Custom Workout');
+  if(!name)return;
+  const payload={
+    name,
+    category:selected('focus'),
+    subcategory:'Custom Builder',
+    event_group:selected('event'),
+    events:[selected('event')],
+    phase:selected('phase'),
+    phases:[selected('phase')],
+    level:selected('level'),
+    total_volume_m:segs.reduce((a,s)=>a+s.d*s.r,0),
+    intensity_min:Math.min(...segs.map(s=>s.i*100)),
+    intensity_max:Math.max(...segs.map(s=>s.i*100)),
+    rep_scheme:segs.map(s=>`${s.r} x ${s.d}m`).join('; '),
+    segments:segs,
+    rest:segs.map(s=>s.rest).join('; '),
+    details:'Custom mixed-distance session.',
+    coaching_cues:'Watch rep quality and adjust rest before mechanics drop.',
+    source:'Mighty Burner Custom Builder',
+    source_reference:'Saved from workout-builder.html',
+    tags:['custom']
+  };
+  try{
+    const data=await workoutApi("add-workout",{method:"POST",body:JSON.stringify(payload)});
+    workouts.unshift(dbToWorkout(data.workout));
+    renderLibrary();
+    renderRecommendations();
+    alert('Workout saved to Supabase.');
+  }catch(error){ alert('Could not save workout: '+error.message); }
+}
+function loadWorkout(name){let w=workouts.find(x=>x.n===name); if(!w)return; document.getElementById('builderLines').innerHTML=''; w.segments.forEach(s=>addLine(s)); document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.getElementById('builder').classList.add('active');document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab')[1].classList.add('active'); renderCustom();}
+function renderLibrary(){
+  let q=(document.getElementById('libSearch')?.value||'').toLowerCase();
+  let list=workouts.filter(w=>!q||JSON.stringify(w).toLowerCase().includes(q));
+  document.getElementById('libraryList').innerHTML=list.map(w=>{
+    const usable=Array.isArray(w.segments)&&w.segments.length;
+    return `<div class="workout"><h3>${w.n}</h3><div class="row"><span class="pill good">${w.f}</span><span class="pill">${volumeOf(w)||'Timed/Technical'}m</span><span class="pill">${w.l}</span></div><p class="muted">${w.purpose}</p><div class="source"><b>${w.source||''}</b></div>${usable?`<button class="small ghost" onclick='loadWorkout(${JSON.stringify(w.n)})'>Use</button>`:''}</div>`
+  }).join('')||'<div class="empty">No library matches.</div>'
+}
+function renderPaceChart(){let distances=[30,40,60,80,100,120,150,200,250,300,350,400,500,600]; let intens=[1,.97,.95,.93,.90,.85,.80,.70]; let rows=distances.map(d=>`<tr><td>${d}m</td>`+intens.map(i=>`<td>${fmtTime(paceTime(d,selected('paceBias')==='auto'?(d<=150?'100':d<=250?'200':'400'):selected('paceBias'),i))}</td>`).join('')+`</tr>`).join('');document.getElementById('paceChart').innerHTML=`<table><thead><tr><th>Distance</th>${intens.map(i=>`<th>${Math.round(i*100)}%</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`}
+// init
+addLine({d:300,r:1,rest:'90 sec',b:'400'});
+addLine({d:200,r:1,rest:'2 min',b:'400'});
+addLine({d:100,r:1,rest:'done',b:'100'});
+(async()=>{await loadWorkoutDatabase();renderRecommendations();renderLibrary();})();
+</script>
+</body></html>
