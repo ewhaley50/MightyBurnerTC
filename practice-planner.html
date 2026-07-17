@@ -374,6 +374,15 @@ function estimateMainMinutes(w){
 
   return mins;
 }
+function meetAdjustmentNote(){
+  const days=+$("daysToMeet").value;
+  if(days<=1)return " | PRE-MEET: sharply reduce reps; stop while athlete feels fast.";
+  if(days<=3)return " | TAPER: low volume, full recovery, no heavy lactate.";
+  if(days<=5)return " | MEET WEEK: reduce normal volume about 25-40%.";
+  if(days<=8)return " | QUALITY WEEK: maintain intensity but avoid excessive volume.";
+  return "";
+}
+
 function buildPractice(forceNewRecommendation=true){
   const rankedRecommendations=recommendations();
   rankedWorkoutIds=rankedRecommendations.map(w=>w.id);
