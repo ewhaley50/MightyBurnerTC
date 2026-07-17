@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mighty Burner Practice Planner</title>
+<style>
+:root{
+  --bg:#0f172a;--panel:#111827;--panel2:#020617;--text:#e5e7eb;--muted:#94a3b8;
+  --line:#334155;--accent:#f97316;--good:#22c55e;--blue:#3b82f6;--bad:#ef4444;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:linear-gradient(135deg,#0f172a,#1e293b);color:var(--text)}
+header{padding:24px 18px;border-bottom:1px solid var(--line);background:rgba(15,23,42,.92);position:sticky;top:0;z-index:20;backdrop-filter:blur(8px)}
+header h1{margin:0;font-size:30px}header .sub{color:var(--muted);margin-top:6px}
+main{max-width:1500px;margin:0 auto;padding:18px}
+.layout{display:grid;grid-template-columns:390px 1fr;gap:18px}
+.card{background:rgba(17,24,39,.96);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+.controls{position:sticky;top:105px;align-self:start}
+h2,h3{margin-top:0}
+label{display:block;font-size:13px;color:var(--muted);margin:11px 0 5px}
+input,select,textarea,button{width:100%;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px;font-size:14px}
+textarea{resize:vertical}
+button{cursor:pointer;background:var(--accent);border-color:var(--accent);color:#111827;font-weight:800}
+button.secondary{background:var(--panel2);color:var(--text);border-color:var(--line)}
+button.blue{background:var(--blue);border-color:var(--blue);color:white}
+button.danger{background:var(--bad);border-color:var(--bad);color:white}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}.toolbar button{width:auto}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.pill{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:999px;padding:5px 8px;font-size:12px;color:var(--muted);background:var(--panel2)}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{display:flex;gap:8px;align-items:center;background:var(--panel2);border:1px solid var(--line);padding:9px;border-radius:10px}
+.check input{width:auto}
+.timeline{display:grid;gap:10px}
+.block{display:grid;grid-template-columns:85px 1fr 100px;gap:12px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.block-time{font-weight:900;color:var(--accent)}
+.block h3{margin:0 0 4px;font-size:17px}.small{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
+.workout-card{background:linear-gradient(180deg,#1f2937,#111827);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.workout-card h3{margin:0 0 6px}
+.workout-card.selected{outline:2px solid var(--accent)}
+.score{font-size:12px;color:var(--good);font-weight:800}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px}.kpi b{font-size:24px}.kpi span{display:block;font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.tab{width:auto;background:var(--panel2);color:var(--text);border-color:var(--line)}.tab.active{background:var(--accent);color:#111827}
+.section{display:none}.section.active{display:block}
+table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:left;font-size:13px}th{background:#0b1220;color:var(--muted)}
+.status-ok{color:var(--good)}.status-bad{color:var(--bad)}
+.drag{cursor:grab;color:var(--muted)}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.controls{position:static}.grid3,.kpis{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.row,.check-grid,.grid3,.kpis{grid-template-columns:1fr}.block{grid-template-columns:70px 1fr}.block button{grid-column:2}}
+@media print{header,.controls,.tabs,.no-print{display:none!important}body{background:white;color:black}.card,.block{box-shadow:none;background:white;color:black;border:1px solid #aaa}.section{display:block}.section:not(.active){display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Mighty Burner Practice Planner</h1>
+  <div class="sub">Build complete sprint and hurdle practices from your Supabase workout library.</div>
+</header>
+
+<main>
+<div class="layout">
+  <aside class="card controls">
+    <h2>Practice Setup</h2>
+
+    <div class="row">
+      <div><label>Date</label><input id="practiceDate" type="date"></div>
+      <div><label>Start Time</label><input id="startTime" type="time" value="17:00"></div>
+    </div>
+
+    <label>Practice Name</label>
+    <input id="practiceName" value="Mighty Burner Practice">
+
+    <div class="row">
+      <div>
+        <label>Event Group</label>
+        <select id="eventGroup">
+          <option>General Sprints</option>
+          <option>100/200</option>
+          <option>400</option>
+          <option>100H/110H</option>
+          <option>300H/400H</option>
+          <option>Mixed Group</option>
+        </select>
+      </div>
+      <div>
+        <label>Main Focus</label>
+        <select id="focus">
+          <option>Acceleration</option>
+          <option>Max Velocity</option>
+          <option selected>Speed Endurance</option>
+          <option>Special Endurance I</option>
+          <option>Special Endurance II</option>
+          <option>Race Modeling</option>
+          <option>High Hurdles</option>
+          <option>400H</option>
+          <option>Tempo</option>
+          <option>Recovery</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Season Phase</label>
+        <select id="phase">
+          <option>General Prep</option>
+          <option selected>Specific Prep</option>
+          <option>Pre-Competition</option>
+          <option>Competition</option>
+          <option>Championship</option>
+        </select>
+      </div>
+      <div>
+        <label>Athlete Level</label>
+        <select id="level">
+          <option>Middle School</option>
+          <option selected>High School</option>
+          <option>College</option>
+          <option>Elite/Masters</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div><label>Available Minutes</label><input id="duration" type="number" value="90" min="30" max="180"></div>
+      <div><label>Days Until Meet</label><input id="daysToMeet" type="number" value="7" min="0" max="60"></div>
+    </div>
+
+    <label>Expected Group Size</label>
+    <input id="groupSize" type="number" value="6" min="1" max="50">
+
+    <label>Athletes</label>
+    <textarea id="athletes" rows="3" placeholder="Carlie, Norah, Gianna, Benji">Carlie, Norah, Gianna, Benji</textarea>
+
+    <label>Equipment Available</label>
+    <div class="check-grid" id="equipment">
+      <label class="check"><input type="checkbox" value="blocks" checked> Blocks</label>
+      <label class="check"><input type="checkbox" value="hurdles" checked> Hurdles</label>
+      <label class="check"><input type="checkbox" value="wickets" checked> Wickets</label>
+      <label class="check"><input type="checkbox" value="sled" checked> Sled</label>
+      <label class="check"><input type="checkbox" value="hills"> Hills</label>
+      <label class="check"><input type="checkbox" value="med ball" checked> Med Ball</label>
+      <label class="check"><input type="checkbox" value="weights"> Weight Room</label>
+      <label class="check"><input type="checkbox" value="timing gates" checked> Timing Gates</label>
+    </div>
+
+    <label>Practice Emphasis / Restrictions</label>
+    <textarea id="notes" rows="3" placeholder="Example: short session, no hard curves, athlete returning from soreness"></textarea>
+
+    <div class="toolbar" style="margin-top:14px">
+      <button onclick="buildPractice()">Build Practice</button>
+      <button class="secondary" onclick="window.print()">Print</button>
+    </div>
+    <div id="status" class="small" style="margin-top:10px"></div>
+  </aside>
+
+  <section>
+    <div class="tabs no-print">
+      <button class="tab active" data-tab="plan">Practice Plan</button>
+      <button class="tab" data-tab="workouts">Workout Choices</button>
+      <button class="tab" data-tab="saved">Saved Practices</button>
+    </div>
+
+    <div id="plan" class="section active">
+      <div class="kpis">
+        <div class="kpi"><b id="kpiMinutes">0</b><span>Total minutes</span></div>
+        <div class="kpi"><b id="kpiMain">—</b><span>Main workout</span></div>
+        <div class="kpi"><b id="kpiVolume">—</b><span>Main volume</span></div>
+        <div class="kpi"><b id="kpiMeet">—</b><span>Days to meet</span></div>
+      </div>
+
+      <div class="card">
+        <div class="toolbar no-print">
+          <button class="blue" onclick="savePractice()">Save Practice</button>
+          <button class="secondary" onclick="copyPractice()">Copy as Text</button>
+          <button class="secondary" onclick="addManualBlock()">Add Block</button>
+        </div>
+        <h2 id="planTitle">Practice Plan</h2>
+        <div id="planMeta" class="muted"></div>
+        <div id="timeline" class="timeline" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <div id="workouts" class="section">
+      <div class="card">
+        <h2>Recommended Workout Choices</h2>
+        <div class="row">
+          <input id="workoutSearch" placeholder="Search workout library" oninput="renderWorkoutChoices()">
+          <select id="sourceFilter" onchange="renderWorkoutChoices()"><option value="">All Sources</option></select>
+        </div>
+        <div id="workoutChoices" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <div id="saved" class="section">
+      <div class="card">
+        <h2>Saved Practices</h2>
+        <button class="secondary no-print" onclick="loadSavedPractices()">Refresh</button>
+        <div id="savedList" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<script>
+let workoutLibrary=[];
+let selectedWorkout=null;
+let currentPlan=[];
+
+const $=id=>document.getElementById(id);
+const today=new Date();
+$("practiceDate").value=today.toISOString().slice(0,10);
+
+document.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  btn.classList.add("active");$(btn.dataset.tab).classList.add("active");
+  if(btn.dataset.tab==="saved")loadSavedPractices();
+});
+
+async function api(path,opts={}){
+  const res=await fetch("/.netlify/functions/"+path,{headers:{"Content-Type":"application/json"},...opts});
+  let data=null;try{data=await res.json()}catch{}
+  if(!res.ok)throw new Error(data?.error||res.statusText);
+  return data;
+}
+function status(msg,ok=true){$("status").innerHTML=`<span class="${ok?'status-ok':'status-bad'}">${msg}</span>`}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+async function loadWorkouts(){
+  status("Loading workout library...");
+  try{
+    const d=await api("get-workouts");
+    workoutLibrary=d.workouts||[];
+    status(`Loaded ${workoutLibrary.length} workouts.`,true);
+    fillSources();
+    buildPractice();
+  }catch(e){
+    status("Could not load workouts: "+e.message,false);
+    workoutLibrary=[];
+  }
+}
+
+function equipmentSelected(){
+  return [...document.querySelectorAll("#equipment input:checked")].map(x=>x.value);
+}
+function focusAliases(f){
+  const map={
+    "Acceleration":["Acceleration"],
+    "Max Velocity":["Max Velocity","Feed the Cats"],
+    "Speed Endurance":["Speed Endurance"],
+    "Special Endurance I":["Special Endurance I","Specific Endurance"],
+    "Special Endurance II":["Special Endurance II"],
+    "Race Modeling":["Race Modeling"],
+    "High Hurdles":["High Hurdles","Hurdles"],
+    "400H":["400H"],
+    "Tempo":["Tempo"],
+    "Recovery":["Recovery","Tempo"]
+  };
+  return map[f]||[f];
+}
+function eventMatches(w,event){
+  const s=(w.event_group||"").toLowerCase();
+  if(event==="Mixed Group")return true;
+  if(event==="100/200")return /100|200|sprint/.test(s);
+  if(event==="400")return /400|sprint/.test(s)&&!/hurdle|300h/.test(s);
+  if(event==="100H/110H")return /100h|110h|high hurdle/.test(s);
+  if(event==="300H/400H")return /300h|400h|hurdle/.test(s);
+  return /sprint|general/.test(s);
+}
+function scoreWorkout(w){
+  let score=0;
+  const aliases=focusAliases($("focus").value);
+  if(aliases.includes(w.category))score+=45;
+  if(eventMatches(w,$("eventGroup").value))score+=28;
+  const phase=(w.phase||"").toLowerCase(),chosen=$("phase").value.toLowerCase();
+  if(phase.includes(chosen.split(" ")[0]))score+=12;
+  const level=(w.level||"").toLowerCase(),chosenLevel=$("level").value.toLowerCase();
+  if(level.includes(chosenLevel.split("/")[0])||level.includes("all"))score+=8;
+  const days=+$("daysToMeet").value;
+  const intensity=Number(w.intensity_max||0);
+  if(days<=3&&intensity>=95&&["Special Endurance II","400H"].includes(w.category))score-=20;
+  if(days<=2&&["Max Velocity","Acceleration","Feed the Cats"].includes(w.category))score+=8;
+  const eq=equipmentSelected().join(" ");
+  const tags=JSON.stringify([w.tags,w.name,w.details,w.subcategory]).toLowerCase();
+  if(tags.includes("hill")&&!eq.includes("hills"))score-=18;
+  if(tags.includes("sled")&&!eq.includes("sled"))score-=12;
+  if(tags.includes("hurdle")&&!eq.includes("hurdles"))score-=25;
+  return score;
+}
+function recommendations(){
+  return workoutLibrary.map(w=>({...w,_score:scoreWorkout(w)})).sort((a,b)=>b._score-a._score);
+}
+function chooseWorkout(id){
+  selectedWorkout=workoutLibrary.find(w=>w.id===id)||null;
+  buildPractice();
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  $("plan").classList.add("active");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  document.querySelector('[data-tab="plan"]').classList.add("active");
+}
+
+function block(title,minutes,details,type="General"){
+  return {id:crypto.randomUUID(),title,minutes,details,type};
+}
+function recommendedWarmup(event,focus){
+  const hurdle=event.includes("H");
+  return [
+    block("Dynamic Warm-Up",10,"Jog, mobility, dynamic flexibility, activation.","Warm-up"),
+    block("Sprint Drills",10,"A-skips, dribbles, ankling, straight-leg bounds, posture drills.","Drills"),
+    hurdle?block("Hurdle Mobility",10,"Walkovers, lead leg, trail leg, one-step mobility and rhythm.","Hurdles"):block("Build-Ups",8,"3-4 progressive runs from 60% to 90%.","Speed Prep"),
+    focus==="Max Velocity"?block("Wickets / Fly Preparation",8,"Wickets or 2-3 progressive fly build-ins.","Speed Prep"):block("Accelerations",8,"3-4 x 20-30m progressive accelerations.","Speed Prep")
+  ];
+}
+function estimateMainMinutes(w){
+  if(!w)return 30;
+  const rest=(w.rest||"").toLowerCase();
+  const vol=Number(w.total_volume_m||0);
+  let mins=20;
+  if(vol>=1200)mins=40;else if(vol>=800)mins=35;else if(vol>=500)mins=30;
+  if(rest.includes("10")||rest.includes("15"))mins+=8;
+  return mins;
+}
+function buildPractice(){
+  if(!selectedWorkout)selectedWorkout=recommendations()[0]||null;
+  const duration=+$("duration").value||90;
+  const event=$("eventGroup").value,focus=$("focus").value;
+  const warm=recommendedWarmup(event,focus);
+  const mainMinutes=estimateMainMinutes(selectedWorkout);
+  let plan=[...warm];
+
+  if(selectedWorkout){
+    plan.push(block(
+      selectedWorkout.name,
+      mainMinutes,
+      `${selectedWorkout.rep_scheme||""}${selectedWorkout.rest?` | Rest: ${selectedWorkout.rest}`:""}${selectedWorkout.details?` | ${selectedWorkout.details}`:""}`,
+      "Main Workout"
+    ));
+  }else{
+    plan.push(block("Main Workout",30,"No database workout selected.","Main Workout"));
+  }
+
+  const used=plan.reduce((a,b)=>a+b.minutes,0);
+  let remaining=duration-used;
+  if(remaining>=15&&equipmentSelected().includes("med ball")){
+    plan.push(block("Plyometrics / Med Ball",10,"Bounds, jumps, med-ball throws, low-volume explosive work.","Power"));
+    remaining-=10;
+  }
+  if(remaining>=15&&equipmentSelected().includes("weights")){
+    plan.push(block("Strength",Math.min(20,remaining-5),"Power cleans, squats, RDLs, split work, trunk.","Strength"));
+    remaining=5;
+  }
+  if(remaining>=5)plan.push(block("Cooldown / Notes",Math.max(5,remaining),"Easy walk/jog, mobility, record times and coaching notes.","Cooldown"));
+
+  currentPlan=plan;
+  renderPlan();
+  renderWorkoutChoices();
+}
+
+function renderPlan(){
+  const date=$("practiceDate").value,start=$("startTime").value;
+  $("planTitle").textContent=$("practiceName").value||"Practice Plan";
+  $("planMeta").textContent=`${date} • ${start} • ${$("eventGroup").value} • ${$("focus").value} • Athletes: ${$("athletes").value||"Not listed"}`;
+  let minsFromStart=0;
+  $("timeline").innerHTML=currentPlan.map((b,i)=>{
+    const [hh,mm]=(start||"17:00").split(":").map(Number);
+    const d=new Date(2000,0,1,hh,mm+minsFromStart);
+    const time=d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+    minsFromStart+=b.minutes;
+    return `<div class="block">
+      <div><div class="block-time">${time}</div><div class="small">${b.minutes} min</div></div>
+      <div><h3>${esc(b.title)}</h3><div class="muted">${esc(b.details)}</div><div class="pills"><span class="pill">${esc(b.type)}</span></div></div>
+      <button class="danger no-print" onclick="removeBlock('${b.id}')">Remove</button>
+    </div>`;
+  }).join("");
+  const total=currentPlan.reduce((a,b)=>a+b.minutes,0);
+  $("kpiMinutes").textContent=total;
+  $("kpiMain").textContent=selectedWorkout?.name||"Custom";
+  $("kpiVolume").textContent=selectedWorkout?.total_volume_m?selectedWorkout.total_volume_m+"m":"—";
+  $("kpiMeet").textContent=$("daysToMeet").value;
+}
+function removeBlock(id){currentPlan=currentPlan.filter(b=>b.id!==id);renderPlan()}
+function addManualBlock(){
+  const title=prompt("Block name","Technical Work");if(!title)return;
+  const mins=Number(prompt("Minutes","10"))||10;
+  const details=prompt("Details","")||"";
+  currentPlan.push(block(title,mins,details,"Custom"));renderPlan();
+}
+
+function fillSources(){
+  const sources=[...new Set(workoutLibrary.map(w=>w.source).filter(Boolean))].sort();
+  $("sourceFilter").innerHTML='<option value="">All Sources</option>'+sources.map(s=>`<option>${esc(s)}</option>`).join("");
+}
+function renderWorkoutChoices(){
+  const q=($("workoutSearch").value||"").toLowerCase(),source=$("sourceFilter").value;
+  const list=recommendations().filter(w=>(!q||JSON.stringify(w).toLowerCase().includes(q))&&(!source||w.source===source)).slice(0,50);
+  $("workoutChoices").innerHTML=list.map(w=>`
+    <div class="workout-card ${selectedWorkout?.id===w.id?'selected':''}">
+      <div class="score">Match score: ${Math.round(w._score)}</div>
+      <h3>${esc(w.name)}</h3>
+      <div class="pills">
+        <span class="pill">${esc(w.category)}</span>
+        <span class="pill">${esc(w.event_group||"")}</span>
+        <span class="pill">${w.total_volume_m?w.total_volume_m+"m":"Technical"}</span>
+        <span class="pill">${esc(w.source||"")}</span>
+      </div>
+      <p class="muted">${esc(w.rep_scheme||"")}</p>
+      <p class="small">${esc(w.details||"")}</p>
+      <button onclick="chooseWorkout('${w.id}')">Use This Workout</button>
+    </div>`).join("")||'<div class="muted">No workouts match.</div>';
+}
+
+function practicePayload(){
+  return {
+    practice_date:$("practiceDate").value,
+    start_time:$("startTime").value,
+    name:$("practiceName").value,
+    event_group:$("eventGroup").value,
+    focus:$("focus").value,
+    phase:$("phase").value,
+    level:$("level").value,
+    duration_minutes:+$("duration").value,
+    days_to_meet:+$("daysToMeet").value,
+    group_size:+$("groupSize").value,
+    athletes:$("athletes").value.split(",").map(x=>x.trim()).filter(Boolean),
+    equipment:equipmentSelected(),
+    notes:$("notes").value,
+    workout_id:selectedWorkout?.id||null,
+    workout_name:selectedWorkout?.name||null,
+    plan_blocks:currentPlan
+  };
+}
+async function savePractice(){
+  try{
+    const d=await api("save-practice",{method:"POST",body:JSON.stringify(practicePayload())});
+    status("Practice saved to Supabase.",true);
+  }catch(e){status("Save failed: "+e.message,false)}
+}
+async function loadSavedPractices(){
+  try{
+    const d=await api("get-practices");
+    const rows=d.practices||[];
+    $("savedList").innerHTML=rows.map(p=>`
+      <div class="workout-card">
+        <h3>${esc(p.name)}</h3>
+        <div class="pills"><span class="pill">${esc(p.practice_date||"")}</span><span class="pill">${esc(p.focus||"")}</span><span class="pill">${esc(p.workout_name||"")}</span></div>
+        <p class="small">${esc((p.athletes||[]).join(", "))}</p>
+        <div class="toolbar">
+          <button onclick='loadSavedIntoPlanner(${JSON.stringify(JSON.stringify(p))})'>Open</button>
+          <button class="danger" onclick="deletePractice('${p.id}')">Delete</button>
+        </div>
+      </div>`).join("")||'<div class="muted">No saved practices yet.</div>';
+  }catch(e){$("savedList").innerHTML=`<div class="status-bad">${esc(e.message)}</div>`}
+}
+function loadSavedIntoPlanner(encoded){
+  const p=JSON.parse(encoded);
+  $("practiceDate").value=p.practice_date||"";$("startTime").value=p.start_time||"17:00";$("practiceName").value=p.name||"Practice";
+  $("eventGroup").value=p.event_group||"General Sprints";$("focus").value=p.focus||"Speed Endurance";$("phase").value=p.phase||"Specific Prep";
+  $("level").value=p.level||"High School";$("duration").value=p.duration_minutes||90;$("daysToMeet").value=p.days_to_meet||7;
+  $("groupSize").value=p.group_size||1;$("athletes").value=(p.athletes||[]).join(", ");$("notes").value=p.notes||"";
+  selectedWorkout=workoutLibrary.find(w=>w.id===p.workout_id)||null;currentPlan=p.plan_blocks||[];renderPlan();
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$("plan").classList.add("active");
+}
+async function deletePractice(id){
+  if(!confirm("Delete this saved practice?"))return;
+  try{await api("delete-practice",{method:"POST",body:JSON.stringify({id})});loadSavedPractices()}catch(e){alert(e.message)}
+}
+function copyPractice(){
+  const text=[
+    $("practiceName").value,
+    `${$("practiceDate").value} • ${$("startTime").value}`,
+    `Athletes: ${$("athletes").value}`,
+    "",
+    ...currentPlan.map((b,i)=>`${i+1}. ${b.title} (${b.minutes} min)\n${b.details}`)
+  ].join("\n");
+  navigator.clipboard.writeText(text).then(()=>status("Practice copied to clipboard.",true));
+}
+
+loadWorkouts();
+</script>
+</body>
+</html>
