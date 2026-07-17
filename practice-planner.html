@@ -150,7 +150,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
     <textarea id="notes" rows="3" placeholder="Example: short session, no hard curves, athlete returning from soreness"></textarea>
 
     <div class="toolbar" style="margin-top:14px">
-      <button onclick="buildPractice()">Build Practice</button>
+      <button onclick="buildPractice(true)">Build Practice</button>
       <button class="secondary" onclick="window.print()">Print</button>
     </div>
     <div id="status" class="small" style="margin-top:10px"></div>
@@ -208,6 +208,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 <script>
 let workoutLibrary=[];
 let selectedWorkout=null;
+let manualWorkoutSelection=false;
 let currentPlan=[];
 
 const $=id=>document.getElementById(id);
@@ -237,7 +238,7 @@ async function loadWorkouts(){
     workoutLibrary=d.workouts||[];
     status(`Loaded ${workoutLibrary.length} workouts.`,true);
     fillSources();
-    buildPractice();
+    buildPractice(true);
   }catch(e){
     status("Could not load workouts: "+e.message,false);
     workoutLibrary=[];
@@ -296,7 +297,8 @@ function recommendations(){
 }
 function chooseWorkout(id){
   selectedWorkout=workoutLibrary.find(w=>w.id===id)||null;
-  buildPractice();
+  manualWorkoutSelection=true;
+  buildPractice(false);
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   $("plan").classList.add("active");
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
@@ -324,8 +326,13 @@ function estimateMainMinutes(w){
   if(rest.includes("10")||rest.includes("15"))mins+=8;
   return mins;
 }
-function buildPractice(){
-  if(!selectedWorkout)selectedWorkout=recommendations()[0]||null;
+function buildPractice(forceNewRecommendation=true){
+  const rankedRecommendations=recommendations();
+
+  if(forceNewRecommendation || !selectedWorkout){
+    selectedWorkout=rankedRecommendations[0]||null;
+    manualWorkoutSelection=false;
+  }
   const duration=+$("duration").value||90;
   const event=$("eventGroup").value,focus=$("focus").value;
   const warm=recommendedWarmup(event,focus);
@@ -363,7 +370,7 @@ function buildPractice(){
 function renderPlan(){
   const date=$("practiceDate").value,start=$("startTime").value;
   $("planTitle").textContent=$("practiceName").value||"Practice Plan";
-  $("planMeta").textContent=`${date} • ${start} • ${$("eventGroup").value} • ${$("focus").value} • Athletes: ${$("athletes").value||"Not listed"}`;
+  $("planMeta").textContent=`${date} • ${start} • ${$("eventGroup").value} • ${$("focus").value} • Athletes: ${$("athletes").value||"Not listed"} • ${manualWorkoutSelection?"Manually selected workout":"Best database match"}`;
   let minsFromStart=0;
   $("timeline").innerHTML=currentPlan.map((b,i)=>{
     const [hh,mm]=(start||"17:00").split(":").map(Number);
@@ -378,7 +385,7 @@ function renderPlan(){
   }).join("");
   const total=currentPlan.reduce((a,b)=>a+b.minutes,0);
   $("kpiMinutes").textContent=total;
-  $("kpiMain").textContent=selectedWorkout?.name||"Custom";
+  $("kpiMain").textContent=selectedWorkout?.name||"No match";
   $("kpiVolume").textContent=selectedWorkout?.total_volume_m?selectedWorkout.total_volume_m+"m":"—";
   $("kpiMeet").textContent=$("daysToMeet").value;
 }
@@ -461,7 +468,10 @@ function loadSavedIntoPlanner(encoded){
   $("eventGroup").value=p.event_group||"General Sprints";$("focus").value=p.focus||"Speed Endurance";$("phase").value=p.phase||"Specific Prep";
   $("level").value=p.level||"High School";$("duration").value=p.duration_minutes||90;$("daysToMeet").value=p.days_to_meet||7;
   $("groupSize").value=p.group_size||1;$("athletes").value=(p.athletes||[]).join(", ");$("notes").value=p.notes||"";
-  selectedWorkout=workoutLibrary.find(w=>w.id===p.workout_id)||null;currentPlan=p.plan_blocks||[];renderPlan();
+  selectedWorkout=workoutLibrary.find(w=>w.id===p.workout_id)||null;
+  manualWorkoutSelection=true;
+  currentPlan=p.plan_blocks||[];
+  renderPlan();
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$("plan").classList.add("active");
 }
 async function deletePractice(id){
