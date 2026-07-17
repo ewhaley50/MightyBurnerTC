@@ -174,6 +174,7 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
       <div class="card">
         <div class="toolbar no-print">
           <button class="blue" onclick="savePractice()">Save Practice</button>
+          <button class="secondary" onclick="nextWorkout()">Next Workout</button>
           <button class="secondary" onclick="copyPractice()">Copy as Text</button>
           <button class="secondary" onclick="addManualBlock()">Add Block</button>
         </div>
@@ -209,6 +210,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px so
 let workoutLibrary=[];
 let selectedWorkout=null;
 let manualWorkoutSelection=false;
+let recommendationIndex=0;
+let rankedWorkoutIds=[];
 let currentPlan=[];
 
 const $=id=>document.getElementById(id);
@@ -275,21 +278,54 @@ function eventMatches(w,event){
 function scoreWorkout(w){
   let score=0;
   const aliases=focusAliases($("focus").value);
-  if(aliases.includes(w.category))score+=45;
-  if(eventMatches(w,$("eventGroup").value))score+=28;
-  const phase=(w.phase||"").toLowerCase(),chosen=$("phase").value.toLowerCase();
-  if(phase.includes(chosen.split(" ")[0]))score+=12;
-  const level=(w.level||"").toLowerCase(),chosenLevel=$("level").value.toLowerCase();
-  if(level.includes(chosenLevel.split("/")[0])||level.includes("all"))score+=8;
+  const category=w.category||"";
+  const phase=(w.phase||"").toLowerCase();
+  const level=(w.level||"").toLowerCase();
+  const selectedLevel=$("level").value.toLowerCase();
+  const chosenPhase=$("phase").value.toLowerCase();
   const days=+$("daysToMeet").value;
   const intensity=Number(w.intensity_max||0);
-  if(days<=3&&intensity>=95&&["Special Endurance II","400H"].includes(w.category))score-=20;
-  if(days<=2&&["Max Velocity","Acceleration","Feed the Cats"].includes(w.category))score+=8;
+  const volume=Number(w.total_volume_m||0);
+  const combined=JSON.stringify([w.name,w.category,w.subcategory,w.details,w.tags,w.rep_scheme]).toLowerCase();
+
+  if(aliases.includes(category))score+=45;
+  if(eventMatches(w,$("eventGroup").value))score+=28;
+  if(phase.includes(chosenPhase.split(" ")[0]))score+=12;
+  if(level.includes(selectedLevel.split("/")[0])||level.includes("all"))score+=8;
+
   const eq=equipmentSelected().join(" ");
-  const tags=JSON.stringify([w.tags,w.name,w.details,w.subcategory]).toLowerCase();
-  if(tags.includes("hill")&&!eq.includes("hills"))score-=18;
-  if(tags.includes("sled")&&!eq.includes("sled"))score-=12;
-  if(tags.includes("hurdle")&&!eq.includes("hurdles"))score-=25;
+  if(combined.includes("hill")&&!eq.includes("hills"))score-=18;
+  if(combined.includes("sled")&&!eq.includes("sled"))score-=12;
+  if(combined.includes("hurdle")&&!eq.includes("hurdles"))score-=25;
+
+  if(days<=1){
+    if(["Recovery","Acceleration","Max Velocity","Feed the Cats"].includes(category))score+=28;
+    if(volume>350)score-=35;
+    if(["Special Endurance I","Special Endurance II","Race Modeling","400H"].includes(category))score-=45;
+    if(combined.includes("lactate")||combined.includes("broken 400")||combined.includes("300"))score-=25;
+  }else if(days<=3){
+    if(["Acceleration","Max Velocity","Feed the Cats","High Hurdles"].includes(category))score+=20;
+    if(volume>500)score-=25;
+    if(intensity>=95&&volume<=300)score+=10;
+    if(["Special Endurance II","Race Modeling"].includes(category))score-=35;
+    if(combined.includes("lactate")||combined.includes("overload"))score-=25;
+  }else if(days<=5){
+    if(["Acceleration","Max Velocity","Speed Endurance","High Hurdles"].includes(category))score+=14;
+    if(volume>750)score-=18;
+    if(category==="Special Endurance II")score-=20;
+    if(combined.includes("500")||combined.includes("600"))score-=15;
+  }else if(days<=8){
+    if(["Speed Endurance","Special Endurance I","Race Modeling","400H"].includes(category))score+=10;
+    if(volume>1100)score-=10;
+  }else{
+    if(["Special Endurance I","Special Endurance II","Race Modeling","400H"].includes(category))score+=8;
+  }
+
+  if(chosenPhase.includes("championship")){
+    if(volume>600)score-=18;
+    if(["Acceleration","Max Velocity","Feed the Cats","High Hurdles"].includes(category))score+=12;
+  }
+
   return score;
 }
 function recommendations(){
@@ -298,6 +334,7 @@ function recommendations(){
 function chooseWorkout(id){
   selectedWorkout=workoutLibrary.find(w=>w.id===id)||null;
   manualWorkoutSelection=true;
+  recommendationIndex=Math.max(0,recommendations().findIndex(w=>w.id===id));
   buildPractice(false);
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
   $("plan").classList.add("active");
@@ -321,17 +358,33 @@ function estimateMainMinutes(w){
   if(!w)return 30;
   const rest=(w.rest||"").toLowerCase();
   const vol=Number(w.total_volume_m||0);
+  const days=+$("daysToMeet").value;
   let mins=20;
-  if(vol>=1200)mins=40;else if(vol>=800)mins=35;else if(vol>=500)mins=30;
+
+  if(vol>=1200)mins=40;
+  else if(vol>=800)mins=35;
+  else if(vol>=500)mins=30;
+
   if(rest.includes("10")||rest.includes("15"))mins+=8;
+
+  if(days<=1)mins=Math.min(mins,15);
+  else if(days<=3)mins=Math.min(mins,20);
+  else if(days<=5)mins=Math.min(mins,25);
+  else if(days<=8)mins=Math.min(mins,32);
+
   return mins;
 }
 function buildPractice(forceNewRecommendation=true){
   const rankedRecommendations=recommendations();
+  rankedWorkoutIds=rankedRecommendations.map(w=>w.id);
 
   if(forceNewRecommendation || !selectedWorkout){
+    recommendationIndex=0;
     selectedWorkout=rankedRecommendations[0]||null;
     manualWorkoutSelection=false;
+  }else{
+    const currentIndex=rankedWorkoutIds.indexOf(selectedWorkout.id);
+    if(currentIndex>=0)recommendationIndex=currentIndex;
   }
   const duration=+$("duration").value||90;
   const event=$("eventGroup").value,focus=$("focus").value;
@@ -343,7 +396,7 @@ function buildPractice(forceNewRecommendation=true){
     plan.push(block(
       selectedWorkout.name,
       mainMinutes,
-      `${selectedWorkout.rep_scheme||""}${selectedWorkout.rest?` | Rest: ${selectedWorkout.rest}`:""}${selectedWorkout.details?` | ${selectedWorkout.details}`:""}`,
+      `${selectedWorkout.rep_scheme||""}${selectedWorkout.rest?` | Rest: ${selectedWorkout.rest}`:""}${selectedWorkout.details?` | ${selectedWorkout.details}`:""}${meetAdjustmentNote()}`,
       "Main Workout"
     ));
   }else{
@@ -367,10 +420,27 @@ function buildPractice(forceNewRecommendation=true){
   renderWorkoutChoices();
 }
 
+function nextWorkout(){
+  const ranked=recommendations();
+  if(!ranked.length){
+    status("No matching workouts were found.",false);
+    return;
+  }
+  rankedWorkoutIds=ranked.map(w=>w.id);
+  recommendationIndex=(recommendationIndex+1)%ranked.length;
+  selectedWorkout=ranked[recommendationIndex];
+  manualWorkoutSelection=false;
+  buildPractice(false);
+  status(`Showing option ${recommendationIndex+1} of ${ranked.length}: ${selectedWorkout.name}`,true);
+}
+
 function renderPlan(){
   const date=$("practiceDate").value,start=$("startTime").value;
   $("planTitle").textContent=$("practiceName").value||"Practice Plan";
-  $("planMeta").textContent=`${date} • ${start} • ${$("eventGroup").value} • ${$("focus").value} • Athletes: ${$("athletes").value||"Not listed"} • ${manualWorkoutSelection?"Manually selected workout":"Best database match"}`;
+  const matchLabel=manualWorkoutSelection
+    ?"Manually selected workout"
+    :`Recommendation ${Math.max(1,recommendationIndex+1)} of ${Math.max(1,rankedWorkoutIds.length)}`;
+  $("planMeta").textContent=`${date} • ${start} • ${$("eventGroup").value} • ${$("focus").value} • Athletes: ${$("athletes").value||"Not listed"} • ${matchLabel}`;
   let minsFromStart=0;
   $("timeline").innerHTML=currentPlan.map((b,i)=>{
     const [hh,mm]=(start||"17:00").split(":").map(Number);
