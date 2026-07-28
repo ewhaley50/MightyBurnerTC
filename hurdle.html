@@ -322,15 +322,40 @@ const menTO={"5'3\"":[89,93],"5'4\"":[88.5,92.5],"5'5\"":[88,92],"5'6\"":[87.5,9
 
 const BASE_PRESETS={
 men:[
-{pair:"1–2",height:30,feet:8,goal:"Quick 1-step"},{pair:"2–3",height:30,feet:8,goal:"Quick 1-step"},{pair:"3–4",height:30,feet:8,goal:"Quick 1-step"},
-{pair:"4–5",height:33,feet:10,goal:"Transition"},{pair:"5–6",height:33,feet:12,goal:"Tight 3-step"},{pair:"6–7",height:36,feet:14,goal:"Controlled 3-step"},
-{pair:"7–8",height:36,feet:16,goal:"Open rhythm"},{pair:"8–9",height:39,feet:18,goal:"Race posture"},{pair:"9–10",height:39,feet:20,goal:"Finish tall and fast"}],
+{pair:"1–2",height:30,feet:9,goal:"Quick 1-step"},
+{pair:"2–3",height:30,feet:9,goal:"Quick 1-step"},
+{pair:"3–4",height:30,feet:13,goal:"Transition into 3-step"},
+{pair:"4–5",height:33,feet:15,goal:"Relaxed 3-step"},
+{pair:"5–6",height:33,feet:18,goal:"Open stride"},
+{pair:"6–7",height:36,feet:22,goal:"Build toward race rhythm"},
+{pair:"7–8",height:36,feet:27,goal:"Strong posture and projection"},
+{pair:"8–9",height:39,feet:33,goal:"Near-full spacing"},
+{pair:"9–10",height:39,feet:34,goal:"Finish about 2 walking feet short of full spacing"}],
 women:[
-{pair:"1–2",height:27,feet:7,goal:"1-step"},{pair:"2–3",height:27,feet:7,goal:"1-step"},{pair:"3–4",height:27,feet:7,goal:"1-step"},
-{pair:"4–5",height:30,feet:9,goal:"Transition"},{pair:"5–6",height:30,feet:11,goal:"Tight 3-step"},{pair:"6–7",height:33,feet:13,goal:"Controlled 3-step"},
-{pair:"7–8",height:33,feet:15,goal:"Open 3-step"},{pair:"8–9",height:33,feet:17,goal:"Fast rhythm"},{pair:"9–10",height:33,feet:19,goal:"Finish tall"}]
+{pair:"1–2",height:27,feet:8,goal:"Quick 1-step"},
+{pair:"2–3",height:27,feet:8,goal:"Quick 1-step"},
+{pair:"3–4",height:27,feet:12,goal:"Transition into 3-step"},
+{pair:"4–5",height:30,feet:14,goal:"Relaxed 3-step"},
+{pair:"5–6",height:30,feet:17,goal:"Open stride"},
+{pair:"6–7",height:33,feet:21,goal:"Build toward race rhythm"},
+{pair:"7–8",height:33,feet:26,goal:"Strong posture and projection"},
+{pair:"8–9",height:33,feet:30,goal:"Near-full spacing"},
+{pair:"9–10",height:33,feet:30,goal:"Finish about 2 walking feet short of full spacing"}]
 };
-const DIFF={easy:{feet:-1,height:-3,label:"Easy"},medium:{feet:0,height:0,label:"Medium"},hard:{feet:1,height:0,label:"Hard"}};
+const DIFF={
+  easy:{feet:-1,height:-3,label:"Easy"},
+  medium:{feet:0,height:0,label:"Medium"},
+  hard:{feet:1,height:0,label:"Hard"}
+};
+
+// Women use difficulty-specific progressions based on actual heel-to-toe measurements.
+// Approximate full women's spacing is 27–27.5 walking steps for this user.
+const WOMEN_EXTEND_PROGRESSIONS={
+  easy:[8,8,11,13,16,19,22,23,23],
+  medium:[8,8,12,14,17,21,24,25,25],
+  hard:[8,8,12,15,18,22,25,26,26]
+};
+
 const REG_FEET={women:8.5,men:9.14};
 
 const TD_DATA={
@@ -415,7 +440,42 @@ function stepIncrements(event,steps){return (event==='women'?[0,6,5,5,5,4,4,3]:[
 function calculateStart(){const event=document.getElementById('event').value,steps=+document.getElementById('steps').value,height=document.getElementById('height').value,athlete=document.getElementById('athlete').value.trim(),data=event==='women'?womenTO:menTO,hurdleDistance=event==='women'?13*39.3700787:13.72*39.3700787,mode=document.getElementById('takeoffMode').value,[minTO,maxTO]=data[height];let takeoff=mode==='autoShort'?minTO:mode==='autoLong'?maxTO:mode==='custom'?+document.getElementById('customTO').value:(minTO+maxTO)/2;const total=hurdleDistance-takeoff,inc=stepIncrements(event,steps),weighted=inc.reduce((s,x,i)=>s+x*(steps-i),0),first=(total-weighted)/steps,lengths=[];for(let i=0;i<steps;i++)lengths.push(i===0?first:lengths[i-1]+inc[i]);let cum=0,tb=document.querySelector('#resultTable tbody');tb.innerHTML='';lengths.forEach((len,i)=>{cum+=len;tb.innerHTML+=`<tr><td>${i+1}</td><td>${inchesToFeet(len)}</td><td>${inchesToFeet(cum)}</td></tr>`});document.getElementById('summary').innerHTML=`${athlete?`<strong>${athlete}</strong><br>`:''}${event==='women'?'Women 100H':'Men 110H'} — Height: <strong>${height}</strong>, Steps: <strong>${steps}</strong><br>Takeoff distance: <strong>${inchesToFeet(takeoff)}</strong><br>Total distance from blocks/front toe to takeoff: <strong>${inchesToFeet(total)}</strong><br>Model range: <strong>${inchesToFeet(minTO)}–${inchesToFeet(maxTO)}</strong>`}
 
 document.getElementById('difficulty').onchange=calculateExtend;document.getElementById('extendEvent').onchange=calculateExtend;document.getElementById('footLength').oninput=calculateExtend;
-function calculateExtend(){const event=document.getElementById('extendEvent').value,difficulty=document.getElementById('difficulty').value,footLength=+document.getElementById('footLength').value||10.5,base=BASE_PRESETS[event],adj=difficulty==='custom'?DIFF.medium:DIFF[difficulty],regInches=REG_FEET[event]*12,tb=document.querySelector('#extendTable tbody');tb.innerHTML='';base.forEach(r=>{const feet=Math.max(5,r.feet+adj.feet),height=Math.max(event==='women'?24:27,r.height+adj.height),est=feet*footLength,pct=est/regInches*100;tb.innerHTML+=`<tr><td>${r.pair}</td><td>${height}"</td><td><strong>${feet}</strong></td><td>${inchesToFeet(est)}</td><td>${pct.toFixed(1)}%</td><td>${r.goal}</td></tr>`});document.getElementById('extendSummary').innerHTML=`<strong>${event==='women'?'Women 100H':'Men 110H'} — ${difficulty[0].toUpperCase()+difficulty.slice(1)}</strong><br>Measurement: <strong>heel-to-toe walking feet</strong><br>Foot length used: <strong>${footLength.toFixed(1)} inches</strong><br>Regulation spacing used for percentage: <strong>${REG_FEET[event].toFixed(2)}m</strong>`}
+function calculateExtend(){
+  const event=document.getElementById('extendEvent').value;
+  const difficulty=document.getElementById('difficulty').value;
+  const footLength=+document.getElementById('footLength').value||10.5;
+  const base=BASE_PRESETS[event];
+  const resolvedDifficulty=difficulty==='custom'?'medium':difficulty;
+  const adj=DIFF[resolvedDifficulty];
+  const regInches=REG_FEET[event]*39.3700787;
+  const tb=document.querySelector('#extendTable tbody');
+  tb.innerHTML='';
+
+  const womenProgression=event==='women'
+    ? WOMEN_EXTEND_PROGRESSIONS[resolvedDifficulty]
+    : null;
+
+  base.forEach((r,index)=>{
+    const feet=event==='women'
+      ? womenProgression[index]
+      : Math.max(5,r.feet+adj.feet);
+    const height=Math.max(event==='women'?24:27,r.height+adj.height);
+    const est=feet*footLength;
+    const pct=est/regInches*100;
+    tb.innerHTML+=`<tr><td>${r.pair}</td><td>${height}"</td><td><strong>${feet}</strong></td><td>${inchesToFeet(est)}</td><td>${pct.toFixed(1)}%</td><td>${r.goal}</td></tr>`;
+  });
+
+  const progression=(event==='women'
+    ? womenProgression
+    : base.map(r=>Math.max(5,r.feet+adj.feet)))
+    .join(' → ');
+  document.getElementById('extendSummary').innerHTML=`
+    <strong>${event==='women'?'Women 100H':'Men 110H'} — ${difficulty[0].toUpperCase()+difficulty.slice(1)}</strong><br>
+    Measurement: <strong>heel-to-toe walking feet</strong><br>
+    Progression: <span class="blue">${progression}</span><br>
+    Foot length used: <strong>${footLength.toFixed(1)} inches</strong><br>
+    Regulation spacing used for percentage: <strong>${REG_FEET[event].toFixed(2)}m</strong>`;
+}
 
 function updateTdControls(){const chart=TD_DATA[document.getElementById('tdChart').value],sel=document.getElementById('tdCheckpoint');sel.innerHTML='';chart.headers.slice(1).forEach((h,i)=>{const o=document.createElement('option');o.value=i+1;o.textContent=h;sel.appendChild(o)});renderTdTable()}
 document.getElementById('tdChart').onchange=updateTdControls;
